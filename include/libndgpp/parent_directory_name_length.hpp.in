@@ -1,0 +1,12 @@
+#ifndef NDGPP_PARENT_DIRECTORY_NAME_LENGTH_HPP
+#define NDGPP_PARENT_DIRECTORY_NAME_LENGTH_HPP
+
+#include <type_traits>
+
+namespace ndgpp
+{
+    using parent_directory_name_length_t = std::integral_constant<std::size_t, ${CMAKE_SOURCE_DIR_LENGTH}>;
+    constexpr parent_directory_name_length_t parent_directory_name_length {};
+}
+
+#endif
