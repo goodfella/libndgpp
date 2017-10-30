@@ -12,3 +12,4 @@ endfunction()
 
 add_subdirectory(algorithm)
 add_subdirectory(ios)
+add_subdirectory(type_traits)
