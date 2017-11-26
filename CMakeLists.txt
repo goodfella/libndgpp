@@ -13,4 +13,6 @@ target_include_directories(ndgpp INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_BINARY_DIR}/include)
 
-add_subdirectory(test)
+if (LIBNDGPP_UNIT_TESTS)
+  add_subdirectory(test)
+endif()
