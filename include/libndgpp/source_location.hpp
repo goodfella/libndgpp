@@ -54,7 +54,7 @@ namespace ndgpp
         return file_;
     }
 
-    std::ostream& operator<<(std::ostream& stream, const source_location& location)
+    inline std::ostream& operator<<(std::ostream& stream, const source_location& location)
     {
         stream << location.file()
                << ':'

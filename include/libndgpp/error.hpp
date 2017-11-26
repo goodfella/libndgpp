@@ -23,7 +23,7 @@ namespace ndgpp
         ndgpp::source_location source_location_;
     };
 
-    ndgpp::exception::exception(const ndgpp::source_location& location):
+    inline ndgpp::exception::exception(const ndgpp::source_location& location):
         source_location_(location)
     {}
 
