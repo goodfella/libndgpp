@@ -14,4 +14,5 @@ add_subdirectory(algorithm)
 add_subdirectory(ios)
 add_subdirectory(type_traits)
 
+libndgpp_test(variant/test.cpp)
 libndgpp_test(tuple/test.cpp)
