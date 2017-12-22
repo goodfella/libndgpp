@@ -27,7 +27,7 @@ namespace ndgpp
             impl_(std::forward<U>(u))
         {}
 
-        unsigned int index() const noexcept;
+        std::size_t index() const noexcept;
 
         template <class T>
         bool holds_alternative() const noexcept;
@@ -50,7 +50,7 @@ namespace ndgpp
 
     template <class ... Ts>
     inline
-    unsigned int variant<Ts...>::index() const noexcept
+    std::size_t variant<Ts...>::index() const noexcept
     {
         return impl_.index;
     }
