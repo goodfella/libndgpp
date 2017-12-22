@@ -14,24 +14,23 @@ namespace ndgpp
             virtual ~variant_storage_base() {}
 
             virtual void copy_construct(void * storage) const {};
+            virtual void move_construct(void * storage) {};
         };
 
-        template <class S, class T, bool P>
-        struct copy_construct;
+        template <class S, class T>
+        struct construct_noop
+        {
+            static void copy(const T& other, void * storage)
+            {}
+        };
 
         template <class S, class T>
-        struct copy_construct<S, T, true>
+        struct construct
         {
-            static void invoke(const T& other, void * storage)
+            static void copy(const T& other, void * storage)
             {
                 new (storage) S(other);
             }
-        };
-
-        template <class S, class T>
-        struct copy_construct<S, T, false>
-        {
-            static void invoke(const T& other, void * storage) {}
         };
 
         template <class T>
@@ -89,9 +88,10 @@ namespace ndgpp
         template <class T>
         inline void variant_storage<T>::copy_construct(void * storage) const
         {
-            ndgpp::detail::copy_construct<variant_storage<value_type>,
-                                          value_type,
-                                          std::is_copy_constructible<value_type>::value>::invoke(this->get(), storage);
+            using constructor = std::conditional_t<std::is_copy_constructible<value_type>::value,
+                                                   detail::construct<variant_storage<T>, T>,
+                                                   detail::construct_noop<variant_storage<T>, T>>;
+            constructor::copy(this->get(), storage);
         }
     }
 }
