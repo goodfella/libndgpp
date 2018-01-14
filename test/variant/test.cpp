@@ -64,6 +64,37 @@ TEST(copy_ctor, is_called)
     EXPECT_TRUE(called);
 }
 
+TEST(move_ctor, is_called)
+{
+    struct tracker
+    {
+        tracker() = default;
+        tracker(const tracker&) = default;
+        tracker& operator=(const tracker&) = default;
+
+        tracker(tracker&& other)
+        {
+            called = true;
+        }
+
+        bool called {false};
+    };
+
+    ndgpp::variant<bool, tracker> tmp{ndgpp::variant<bool, tracker>{tracker{}}};
+
+    bool called {false};
+    tmp.match(
+        [&called] (const bool&) {
+            called = false;
+        },
+        [&called] (const tracker& tracker) {
+            called = tracker.called;
+        }
+    );
+
+    EXPECT_TRUE(called);
+}
+
 TEST(member_function, index)
 {
     {

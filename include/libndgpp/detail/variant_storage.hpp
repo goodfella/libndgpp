@@ -22,6 +22,9 @@ namespace ndgpp
         {
             static void copy(const T& other, void * storage)
             {}
+
+            static void move(T&& other, void * storage)
+            {}
         };
 
         template <class S, class T>
@@ -30,6 +33,11 @@ namespace ndgpp
             static void copy(const T& other, void * storage)
             {
                 new (storage) S(other);
+            }
+
+            static void move(T&& other, void * storage)
+            {
+                new (storage) S(std::move(other));
             }
         };
 
@@ -46,6 +54,7 @@ namespace ndgpp
             ~variant_storage();
 
             void copy_construct(void * storage) const override;
+            void move_construct(void * storage) override;
 
             const T& get() const noexcept;
             T& get() noexcept;
@@ -92,6 +101,15 @@ namespace ndgpp
                                                    detail::construct<variant_storage<T>, T>,
                                                    detail::construct_noop<variant_storage<T>, T>>;
             constructor::copy(this->get(), storage);
+        }
+
+        template <class T>
+        inline void variant_storage<T>::move_construct(void * storage)
+        {
+            using constructor = std::conditional_t<std::is_move_constructible<value_type>::value,
+                                                   detail::construct<variant_storage<T>, T>,
+                                                   detail::construct_noop<variant_storage<T>, T>>;
+            constructor::move(std::move(this->get()), storage);
         }
     }
 }

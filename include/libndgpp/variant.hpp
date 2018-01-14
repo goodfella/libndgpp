@@ -9,6 +9,7 @@
 #include "tuple.hpp"
 #include "sfinae.hpp"
 #include "type_traits/copy_control.hpp"
+#include "type_traits/move_control.hpp"
 #include "detail/variant_impl.hpp"
 #include "detail/variant_storage.hpp"
 
@@ -18,7 +19,9 @@ namespace ndgpp
     static constexpr none_t none{};
 
     template <class ... Ts>
-    class variant: public ndgpp::copy_control<Ts...>
+    class variant:
+        public ndgpp::copy_control<Ts...>,
+        public ndgpp::move_control<Ts...>
     {
         public:
 

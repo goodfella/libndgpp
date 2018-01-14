@@ -24,6 +24,7 @@ namespace ndgpp
             }
 
             variant_impl(const variant_impl<Ts...>& other);
+            variant_impl(variant_impl<Ts...>&& other);
 
             constexpr bool valueless_by_exception() const noexcept;
 
@@ -47,6 +48,14 @@ namespace ndgpp
 
             other.storage_base().copy_construct(std::addressof(storage));
             this->index = other.index;
+        }
+
+        template <class ... Ts>
+        variant_impl<Ts...>::variant_impl(variant_impl<Ts...>&& other):
+            index(other.index)
+        {
+            other.index = variant_npos;
+            other.storage_base().move_construct(std::addressof(storage));
         }
 
         template <class ... Ts>
