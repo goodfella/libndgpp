@@ -102,6 +102,13 @@ namespace ndgpp
     {
         matcher(branches...);
     }
+
+    template <class ... Ts>
+    inline
+    void match(const variant<Ts...>& v, const std::function<void (const Ts&)>& ... branches)
+    {
+        v.match(branches...);
+    }
 }
 
 #endif
