@@ -155,6 +155,25 @@ TEST(member_function, holds_alternative)
     }
 }
 
+TEST(member_function, emplace_index_args)
+{
+    ndgpp::variant<double, int> v{1};
+    const auto t = v.emplace<0>(1.5);
+    EXPECT_EQ(1.5, t);
+
+    bool proper_type = false;
+    v.match(
+        [&proper_type] (const double&) {
+            proper_type = true;
+        },
+        [&proper_type] (const int&) {
+            proper_type = false;
+        }
+    );
+
+    EXPECT_TRUE(proper_type);
+}
+
 TEST(member_function, operator_bool)
 {
     {

@@ -8,11 +8,23 @@ namespace ndgpp
     template <class ... Ts>
     class variant;
 
+    namespace detail
+    {
+        template <class ... Ts>
+        struct variant_impl;
+    }
+
     template <std::size_t I, class T>
     struct variant_alternative;
 
     template <std::size_t I, class ... Ts>
     struct variant_alternative<I, variant<Ts...>>
+    {
+        using type = std::tuple_element_t<I, std::tuple<Ts...>>;
+    };
+
+    template <std::size_t I, class ... Ts>
+    struct variant_alternative<I, detail::variant_impl<Ts...>>
     {
         using type = std::tuple_element_t<I, std::tuple<Ts...>>;
     };

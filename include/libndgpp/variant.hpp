@@ -36,6 +36,9 @@ namespace ndgpp
         template <class T>
         bool holds_alternative() const noexcept;
 
+        template <std::size_t I, class ... Args>
+        variant_alternative_t<I, variant<Ts...>>& emplace(Args&& ... args);
+
         void match(const std::function<void (const Ts&)>& ... branches) const;
 
         explicit
@@ -67,6 +70,14 @@ namespace ndgpp
         static_assert(ndgpp::tuple_contains<T, std::tuple<Ts...>>::value,
                       "T is not an alternative for this variant");
         return this->index() == ndgpp::tuple_index<T, std::tuple<Ts...>>::value;
+    }
+
+    template <class ... Ts>
+    template <std::size_t I, class ... Args>
+    inline
+    variant_alternative_t<I, variant<Ts...>>& variant<Ts...>::emplace(Args&& ... args)
+    {
+        return this->impl_.emplace<I, Args...>(std::forward<Args>(args)...);
     }
 
     template <class ... Ts>
