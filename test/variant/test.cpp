@@ -18,6 +18,38 @@ struct dtor_tracker
     std::reference_wrapper<bool> called_;
 };
 
+TEST(variant_alternative, not_helper_alias)
+{
+    using variant_type = ndgpp::variant<char, int ,short>;
+    using type_0 = typename ndgpp::variant_alternative<0, variant_type>::type;
+    using type_1 = typename ndgpp::variant_alternative<1, variant_type>::type;
+    using type_2 = typename ndgpp::variant_alternative<2, variant_type>::type;
+
+    constexpr auto test_0 = std::is_same<char, type_0>::value;
+    constexpr auto test_1 = std::is_same<int, type_1>::value;
+    constexpr auto test_2 = std::is_same<short, type_2>::value;
+
+    EXPECT_TRUE(test_0);
+    EXPECT_TRUE(test_1);
+    EXPECT_TRUE(test_2);
+}
+
+TEST(variant_alternative, helper_alias)
+{
+    using variant_type = ndgpp::variant<char, int ,short>;
+    using type_0 = ndgpp::variant_alternative_t<0, variant_type>;
+    using type_1 = ndgpp::variant_alternative_t<1, variant_type>;
+    using type_2 = ndgpp::variant_alternative_t<2, variant_type>;
+
+    constexpr auto test_0 = std::is_same<char, type_0>::value;
+    constexpr auto test_1 = std::is_same<int, type_1>::value;
+    constexpr auto test_2 = std::is_same<short, type_2>::value;
+
+    EXPECT_TRUE(test_0);
+    EXPECT_TRUE(test_1);
+    EXPECT_TRUE(test_2);
+}
+
 TEST(dtor, is_called)
 {
 

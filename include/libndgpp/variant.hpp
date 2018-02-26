@@ -10,6 +10,7 @@
 #include "sfinae.hpp"
 #include "type_traits/copy_control.hpp"
 #include "type_traits/move_control.hpp"
+#include "variant_alternative.hpp"
 #include "detail/variant_impl.hpp"
 #include "detail/variant_storage.hpp"
 
