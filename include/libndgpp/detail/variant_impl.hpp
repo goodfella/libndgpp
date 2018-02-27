@@ -49,6 +49,20 @@ namespace ndgpp
             template <std::size_t I>
             const ndgpp::detail::variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& get() const & noexcept;
 
+            void match(const std::function<void (const Ts&)>& ... branches) const &;
+            void match(const std::function<void (Ts&&)>& ... branches) &&;
+
+            void matcher() const &;
+            void matcher() &&;
+
+            template <class U, class ... Us>
+            void matcher(const std::function<void (const U&)>& branch,
+                         const std::function<void (const Us&)>& ... branches) const &;
+
+            template <class U, class ... Us>
+            void matcher(const std::function<void (U&&)>& branch,
+                         const std::function<void (Us&&)>& ... branches) &&;
+
             std::aligned_union_t<0, ndgpp::detail::variant_storage_base, ndgpp::detail::variant_storage<Ts>...> storage;
         };
 
@@ -140,6 +154,62 @@ namespace ndgpp
         ndgpp::detail::variant_storage_base & variant_impl<Ts...>::storage_base() noexcept
         {
             return *reinterpret_cast<ndgpp::detail::variant_storage_base *>(std::addressof(storage));
+        }
+
+        template <class ... Ts>
+        inline
+        void variant_impl<Ts...>::matcher() const &
+        {}
+
+        template <class ... Ts>
+        inline
+        void variant_impl<Ts...>::matcher() &&
+        {}
+
+        template <class ... Ts>
+        template <class U, class ... Us>
+        inline
+        void variant_impl<Ts...>::matcher(const std::function<void (const U&)>& branch,
+                                          const std::function<void (const Us&)>& ... branches) const &
+        {
+            if (ndgpp::tuple_index<U, std::tuple<Ts...>>::value == this->index)
+            {
+                branch(this->get<ndgpp::tuple_index<U, std::tuple<Ts...>>::value>().get());
+            }
+            else
+            {
+                matcher(branches...);
+            }
+        }
+
+        template <class ... Ts>
+        template <class U, class ... Us>
+        inline
+        void variant_impl<Ts...>::matcher(const std::function<void (U&&)>& branch,
+                                          const std::function<void (Us&&)>& ... branches) &&
+        {
+            if (ndgpp::tuple_index<U, std::tuple<Ts...>>::value == this->index)
+            {
+                branch(std::move(*this).get<ndgpp::tuple_index<U, std::tuple<Ts...>>::value>().get());
+            }
+            else
+            {
+                std::move(*this).matcher(branches...);
+            }
+        }
+
+        template <class ... Ts>
+        inline
+        void variant_impl<Ts...>::match(const std::function<void (const Ts&)>& ... branches) const &
+        {
+            matcher(branches...);
+        }
+
+        template <class ... Ts>
+        inline
+        void variant_impl<Ts...>::match(const std::function<void (Ts&&)>& ... branches) &&
+        {
+            std::move(*this).matcher(branches...);
         }
     }
 }

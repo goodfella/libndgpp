@@ -46,12 +46,6 @@ namespace ndgpp
 
         private:
 
-        void matcher() const;
-
-        template <class U, class ... Us>
-        void matcher(const std::function<void (const U&)>& branch,
-                     const std::function<void (const Us&)>& ... branches) const;
-
         ndgpp::detail::variant_impl<Ts...> impl_;
     };
 
@@ -92,30 +86,9 @@ namespace ndgpp
 
     template <class ... Ts>
     inline
-    void variant<Ts...>::matcher() const
-    {}
-
-    template <class ... Ts>
-    template <class U, class ... Us>
-    inline
-    void variant<Ts...>::matcher(const std::function<void (const U&)>& branch,
-                                 const std::function<void (const Us&)>& ... branches) const
-    {
-        if (ndgpp::tuple_index<U, std::tuple<Ts...>>::value == this->index())
-        {
-            branch(static_cast<const ndgpp::detail::variant_storage<U>&>(impl_.storage_base()).get());
-        }
-        else
-        {
-            matcher(branches...);
-        }
-    }
-
-    template <class ... Ts>
-    inline
     void variant<Ts...>::match(const std::function<void (const Ts&)>& ... branches) const
     {
-        matcher(branches...);
+        impl_.match(branches...);
     }
 
     template <class ... Ts>
