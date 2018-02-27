@@ -56,8 +56,9 @@ namespace ndgpp
             void copy_construct(void * storage) const override;
             void move_construct(void * storage) override;
 
-            const T& get() const noexcept;
-            T& get() noexcept;
+            const T& get() const & noexcept;
+            T& get() & noexcept;
+            T&& get() && noexcept;
 
             private:
 
@@ -83,15 +84,21 @@ namespace ndgpp
         }
 
         template <class T>
-        inline const T& variant_storage<T>::get() const noexcept
+        inline const T& variant_storage<T>::get() const & noexcept
         {
             return *reinterpret_cast<value_type const *>(std::addressof(storage_));
         }
 
         template <class T>
-        inline T& variant_storage<T>::get() noexcept
+        inline T& variant_storage<T>::get() & noexcept
         {
             return *reinterpret_cast<value_type *>(std::addressof(storage_));
+        }
+
+        template <class T>
+        inline T&& variant_storage<T>::get() && noexcept
+        {
+            return std::move(*reinterpret_cast<value_type *>(std::addressof(storage_)));
         }
 
         template <class T>

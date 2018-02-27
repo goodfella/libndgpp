@@ -41,10 +41,13 @@ namespace ndgpp
             ndgpp::variant_alternative_t<I, variant_impl<Ts...>>& emplace(Args&& ... args);
 
             template <std::size_t I>
-            ndgpp::detail::variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& get() noexcept;
+            ndgpp::detail::variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& get() & noexcept;
 
             template <std::size_t I>
-            const ndgpp::detail::variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& get() const noexcept;
+            ndgpp::detail::variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>&& get() && noexcept;
+
+            template <std::size_t I>
+            const ndgpp::detail::variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& get() const & noexcept;
 
             std::aligned_union_t<0, ndgpp::detail::variant_storage_base, ndgpp::detail::variant_storage<Ts>...> storage;
         };
@@ -82,7 +85,7 @@ namespace ndgpp
 
         template <class ... Ts>
         template <std::size_t I>
-        variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& variant_impl<Ts...>::get() noexcept
+        variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& variant_impl<Ts...>::get() & noexcept
         {
             using variant_storage_type = variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>;
             return *reinterpret_cast<variant_storage_type*>(std::addressof(storage));
@@ -90,7 +93,15 @@ namespace ndgpp
 
         template <class ... Ts>
         template <std::size_t I>
-        const variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& variant_impl<Ts...>::get() const noexcept
+        variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>&& variant_impl<Ts...>::get() && noexcept
+        {
+            using variant_storage_type = variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>;
+            return std::move(*reinterpret_cast<variant_storage_type*>(std::addressof(storage)));
+        }
+
+        template <class ... Ts>
+        template <std::size_t I>
+        const variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& variant_impl<Ts...>::get() const & noexcept
         {
             using variant_storage_type = const variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>;
             return *reinterpret_cast<variant_storage_type*>(std::addressof(storage));
