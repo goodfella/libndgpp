@@ -16,6 +16,7 @@ namespace ndgpp
         return print_type_t<T>{};
     }
 
+    /// Helper function to generate a print_type_t compilation error
     template <class ... Ts>
     inline decltype(auto) print_types(Ts&& ... ts)
     {
