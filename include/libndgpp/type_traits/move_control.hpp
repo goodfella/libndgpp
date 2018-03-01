@@ -1,6 +1,8 @@
 #ifndef LIBNDGPP_MOVE_CONTROL_HPP
 #define LIBNDGPP_MOVE_CONTROL_HPP
 
+#include <libndgpp/type_traits/conjunction_type.hpp>
+
 namespace ndgpp
 {
     namespace detail
@@ -25,8 +27,8 @@ namespace ndgpp
      *          and move assignable.
      */
     template <class ... Ts>
-    using move_control = std::conditional_t<ndgpp::conjunction<std::is_move_constructible<Ts>...>::value &&
-                                            ndgpp::conjunction<std::is_move_assignable<Ts>...>::value,
+    using move_control = std::conditional_t<ndgpp::conjunction_type<std::is_move_constructible<Ts>...>::value &&
+                                            ndgpp::conjunction_type<std::is_move_assignable<Ts>...>::value,
                                             ndgpp::detail::moveable_type,
                                             ndgpp::detail::non_moveable_type>;
 }
