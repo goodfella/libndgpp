@@ -18,6 +18,13 @@ struct dtor_tracker
     std::reference_wrapper<bool> called_;
 };
 
+template <class T>
+struct throws_on_conversion
+{
+    operator T () { throw 42; }
+};
+
+
 TEST(variant_alternative, not_helper_alias)
 {
     using variant_type = ndgpp::variant<char, int ,short>;
@@ -172,6 +179,14 @@ TEST(member_function, emplace_index_args)
     );
 
     EXPECT_TRUE(proper_type);
+}
+
+TEST(member_function, emplace_index_arg_with_exception)
+{
+    ndgpp::variant<double, int> v{1};
+    const auto will_throw = [&v] () {v.emplace<1>(throws_on_conversion<int>{});};
+    EXPECT_THROW(will_throw(), int);
+    EXPECT_TRUE(v.valueless_by_exception());
 }
 
 TEST(member_function, operator_bool)

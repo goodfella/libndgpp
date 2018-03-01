@@ -133,7 +133,15 @@ namespace ndgpp
 
             using T = std::decay_t<std::tuple_element_t<I, std::tuple<Ts...>>>;
 
-            new (std::addressof(storage)) ndgpp::detail::variant_storage<T>(std::forward<Args>(args)...);
+            try
+            {
+                new (std::addressof(storage)) ndgpp::detail::variant_storage<T>(std::forward<Args>(args)...);
+            }
+            catch (...) {
+                this->index = ndgpp::variant_npos;
+                throw;
+            }
+
             this->index = I;
             return this->get<I>().get();
         }
