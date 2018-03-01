@@ -15,6 +15,11 @@ namespace ndgpp
 
             virtual void copy_construct(void * storage) const {};
             virtual void move_construct(void * storage) {};
+
+            virtual void move_assign(void * storage) {};
+
+            virtual void * get_ptr() noexcept { return nullptr; };
+            virtual void const * get_ptr() const noexcept { return nullptr; };
         };
 
         template <class S, class T>
@@ -42,6 +47,23 @@ namespace ndgpp
         };
 
         template <class T>
+        struct assign_noop
+        {
+            static void move(const T& other, void * storage)
+            {}
+        };
+
+        template <class T>
+        struct assign
+        {
+            static void move(T&& other, void * storage)
+            {
+                auto & t = *static_cast<T*>(storage);
+                t = std::move(other);
+            }
+        };
+
+        template <class T>
         class variant_storage: public variant_storage_base
         {
             public:
@@ -56,9 +78,14 @@ namespace ndgpp
             void copy_construct(void * storage) const override;
             void move_construct(void * storage) override;
 
+            void move_assign(void * storage) override;
+
             const T& get() const & noexcept;
             T& get() & noexcept;
             T&& get() && noexcept;
+
+            void * get_ptr() noexcept override;
+            void const * get_ptr() const noexcept override;
 
             private:
 
@@ -102,6 +129,18 @@ namespace ndgpp
         }
 
         template <class T>
+        inline void * variant_storage<T>::get_ptr() noexcept
+        {
+            return reinterpret_cast<void *>(std::addressof(storage_));
+        }
+
+        template <class T>
+        inline void const * variant_storage<T>::get_ptr() const noexcept
+        {
+            return reinterpret_cast<void const *>(std::addressof(storage_));
+        }
+
+        template <class T>
         inline void variant_storage<T>::copy_construct(void * storage) const
         {
             using constructor = std::conditional_t<std::is_copy_constructible<value_type>::value,
@@ -117,6 +156,16 @@ namespace ndgpp
                                                    detail::construct<variant_storage<T>, T>,
                                                    detail::construct_noop<variant_storage<T>, T>>;
             constructor::move(std::move(this->get()), storage);
+        }
+
+        template <class T>
+        inline void variant_storage<T>::move_assign(void * storage)
+        {
+            using assigner = std::conditional_t<std::is_copy_assignable<value_type>::value,
+                                                detail::assign<T>,
+                                                detail::assign_noop<T>>;
+
+            assigner::move(std::move(this->get()), storage);
         }
     }
 }

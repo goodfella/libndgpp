@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <functional>
+#include <type_traits>
 #include <libndgpp/variant.hpp>
 
 struct dtor_tracker
@@ -103,35 +104,218 @@ TEST(copy_ctor, is_called)
     EXPECT_TRUE(called);
 }
 
+struct move_tracker
+{
+    move_tracker() = default;
+
+    move_tracker(const move_tracker&):
+        called(false)
+    {}
+
+    move_tracker& operator=(const move_tracker&)
+    {
+        called = false;
+    }
+
+    move_tracker(move_tracker&& other):
+        called(true)
+    {}
+
+    move_tracker& operator=(move_tracker&&)
+    {
+        called = true;
+    }
+
+    bool called {false};
+};
+
 TEST(move_ctor, is_called)
 {
-    struct tracker
-    {
-        tracker() = default;
-        tracker(const tracker&) = default;
-        tracker& operator=(const tracker&) = default;
 
-        tracker(tracker&& other)
-        {
-            called = true;
-        }
-
-        bool called {false};
-    };
-
-    ndgpp::variant<bool, tracker> tmp{ndgpp::variant<bool, tracker>{tracker{}}};
+    ndgpp::variant<bool, move_tracker> tmp{ndgpp::variant<bool, move_tracker>{move_tracker{}}};
 
     bool called {false};
     tmp.match(
         [&called] (const bool&) {
             called = false;
         },
-        [&called] (const tracker& tracker) {
+        [&called] (const move_tracker& tracker) {
             called = tracker.called;
         }
     );
 
     EXPECT_TRUE(called);
+}
+
+TEST(move_assign, different_types)
+{
+    {
+        ndgpp::variant<int, double> v1{1};
+        ASSERT_EQ(0, v1.index());
+
+        const auto & rv = v1 = ndgpp::variant<int, double>{1.3};
+        EXPECT_EQ(1, v1.index());
+        EXPECT_EQ(&v1, &rv);
+
+        bool correct_value = false;
+        v1.match(
+            [&correct_value] (const int&) {
+                correct_value = false;
+            },
+            [&correct_value] (const double& v) {
+                correct_value = (v == 1.3);
+            }
+        );
+
+        EXPECT_TRUE(correct_value);
+    }
+
+    {
+        ndgpp::variant<int, move_tracker> v1{1};
+        v1 = ndgpp::variant<int, move_tracker>{move_tracker{}};
+
+        bool move_called = false;
+        v1.match(
+            [&move_called] (const int&) {
+                move_called = false;
+            },
+            [&move_called] (const move_tracker& t) {
+                move_called = t.called;
+            }
+        );
+
+        EXPECT_TRUE(move_called);
+    }
+}
+
+TEST(move_assign, same_types)
+{
+    {
+        ndgpp::variant<int, double> v1{1};
+        ASSERT_EQ(0, v1.index());
+
+        const auto & rv = v1 = ndgpp::variant<int, double>{2};
+        EXPECT_EQ(0, v1.index());
+        EXPECT_EQ(&v1, &rv);
+
+        bool correct_value = false;
+        v1.match(
+            [&correct_value] (const int& v) {
+                correct_value = (v == 2);
+            },
+            [&correct_value] (const double&) {
+                correct_value = false;
+            }
+        );
+
+        EXPECT_TRUE(correct_value);
+    }
+
+    {
+        ndgpp::variant<int, move_tracker> v1{move_tracker{}};
+        v1 = ndgpp::variant<int, move_tracker>{move_tracker{}};
+
+        bool move_called = false;
+        v1.match(
+            [&move_called] (const int&) {
+                move_called = false;
+            },
+            [&move_called] (const move_tracker& t) {
+                move_called = t.called;
+            }
+        );
+
+        EXPECT_TRUE(move_called);
+    }
+}
+
+TEST(move_assign, both_valueless_by_exception)
+{
+    ndgpp::variant<double, int> v1{1};
+    try
+    {
+        v1.emplace<1>(throws_on_conversion<int>{});
+    }
+    catch (...) {}
+    ASSERT_TRUE(v1.valueless_by_exception());
+
+    ndgpp::variant<double, int> v2{1};
+    try
+    {
+        v2.emplace<1>(throws_on_conversion<int>{});
+    }
+    catch (...) {}
+    ASSERT_TRUE(v2.valueless_by_exception());
+
+    const auto & rv = v1 = std::move(v2);
+    EXPECT_EQ(&v1, &rv);
+    EXPECT_TRUE(v1.valueless_by_exception());
+}
+
+TEST(move_assign, other_valueless_by_exception)
+{
+    bool dtor_called = false;
+    ndgpp::variant<double, dtor_tracker> v1{dtor_tracker{dtor_called}};
+
+    ndgpp::variant<double, dtor_tracker> v2{1.0};
+    try
+    {
+        v2.emplace<1>(throws_on_conversion<dtor_tracker>{});
+    }
+    catch (...) {}
+    ASSERT_TRUE(v2.valueless_by_exception());
+
+    const auto & rv = v1 = std::move(v2);
+    EXPECT_EQ(&v1, &rv);
+    EXPECT_TRUE(v1.valueless_by_exception());
+    EXPECT_TRUE(dtor_called);
+}
+
+TEST(move_assign, this_valueless_by_exception)
+{
+    ndgpp::variant<double, int> v1{1.0};
+    try
+    {
+        v1.emplace<1>(throws_on_conversion<int>{});
+    }
+    catch (...) {}
+    ASSERT_TRUE(v1.valueless_by_exception());
+
+    ndgpp::variant<double, int> v2{3.0};
+
+    const auto & rv = v1 = std::move(v2);
+    EXPECT_EQ(&v1, &rv);
+    EXPECT_FALSE(v1.valueless_by_exception());
+    EXPECT_EQ(0, v1.index());
+
+    bool correct_value = false;
+    v1.match(
+        [&correct_value] (const double v) {
+            correct_value = (v == 3.0);
+        },
+        [] (const int) {}
+    );
+
+    EXPECT_TRUE(correct_value);
+}
+
+TEST(move_assign, noexcept_specifier)
+{
+    {
+        constexpr bool is_noexcept = std::is_nothrow_move_assignable<ndgpp::variant<int, double>>::value;
+        EXPECT_TRUE(is_noexcept);
+    }
+
+    {
+        struct move_assign_throws
+        {
+            move_assign_throws(move_assign_throws &&) = default;
+            move_assign_throws & operator= (move_assign_throws &&) { throw 42; }
+        };
+
+        constexpr bool is_noexcept = std::is_nothrow_move_assignable<ndgpp::variant<int, move_assign_throws>>::value;
+        EXPECT_FALSE(is_noexcept);
+    }
 }
 
 TEST(member_function, index)

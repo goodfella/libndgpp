@@ -3,8 +3,11 @@
 
 #include <limits>
 #include <tuple>
+#include <functional>
+#include <type_traits>
 
 #include <libndgpp/variant_alternative.hpp>
+#include <libndgpp/type_traits/conjunction_type.hpp>
 #include <libndgpp/sfinae.hpp>
 #include "variant_storage.hpp"
 
@@ -27,6 +30,13 @@ namespace ndgpp
             }
 
             variant_impl(const variant_impl<Ts...>& other);
+
+            static constexpr bool move_assign_noexcept =
+                ndgpp::conjunction_type<std::is_nothrow_move_constructible<Ts> ...>::value &&
+                ndgpp::conjunction_type<std::is_nothrow_move_assignable<Ts> ...>::value;
+
+            variant_impl& operator= (variant_impl<Ts...>&& other) noexcept(move_assign_noexcept);
+
             variant_impl(variant_impl<Ts...>&& other);
 
             constexpr bool valueless_by_exception() const noexcept;
@@ -66,6 +76,25 @@ namespace ndgpp
             std::aligned_union_t<0, ndgpp::detail::variant_storage_base, ndgpp::detail::variant_storage<Ts>...> storage;
         };
 
+        template <class T, class ... Ts>
+        struct variant_impl_emplace;
+
+        template <class T, class ... Ts>
+        struct variant_impl_emplace<T, variant_impl<Ts...>>
+        {
+            void operator() (T&& t)
+            {
+                variant.get().template emplace<ndgpp::tuple_index<T, std::tuple<Ts...>>::value>(std::move(t));
+            }
+
+            void operator() (const T& t)
+            {
+                variant.get().template emplace<ndgpp::tuple_index<T, std::tuple<Ts...>>::value>(t);
+            }
+
+            std::reference_wrapper<variant_impl<Ts...>> variant;
+        };
+
         template <class ... Ts>
         variant_impl<Ts...>::variant_impl(const variant_impl<Ts...>& other):
             index(variant_npos)
@@ -77,6 +106,35 @@ namespace ndgpp
 
             other.storage_base().copy_construct(std::addressof(storage));
             this->index = other.index;
+        }
+
+        template <class ... Ts>
+        variant_impl<Ts...>& variant_impl<Ts...>::operator=(variant_impl<Ts...>&& other) noexcept(variant_impl<Ts...>::move_assign_noexcept)
+        {
+            if (this == &other)
+            {
+                return *this;
+            }
+            else if (this->valueless_by_exception() && other.valueless_by_exception())
+            {
+                return *this;
+            }
+            else if (other.valueless_by_exception())
+            {
+                this->index = variant_npos;
+                this->storage_base().~variant_storage_base();
+            }
+            else if (other.index == this->index)
+            {
+                other.storage_base().move_assign(this->storage_base().get_ptr());
+            }
+            else
+            {
+                using variant_type = variant_impl<Ts...>;
+                std::move(other).match(variant_impl_emplace<Ts, variant_type>{std::ref(*this)}...);
+            }
+
+            return *this;
         }
 
         template <class ... Ts>
