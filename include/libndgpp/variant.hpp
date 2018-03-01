@@ -36,6 +36,8 @@ namespace ndgpp
         template <class T>
         bool holds_alternative() const noexcept;
 
+        constexpr bool valueless_by_exception() const noexcept;
+
         template <std::size_t I, class ... Args>
         variant_alternative_t<I, variant<Ts...>>& emplace(Args&& ... args);
 
@@ -64,6 +66,13 @@ namespace ndgpp
         static_assert(ndgpp::tuple_contains<T, std::tuple<Ts...>>::value,
                       "T is not an alternative for this variant");
         return this->index() == ndgpp::tuple_index<T, std::tuple<Ts...>>::value;
+    }
+
+    template <class ... Ts>
+    inline
+    constexpr bool variant<Ts...>::valueless_by_exception() const noexcept
+    {
+        return this->impl_.valueless_by_exception();
     }
 
     template <class ... Ts>
