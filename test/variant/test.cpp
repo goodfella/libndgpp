@@ -81,6 +81,28 @@ TEST(dtor, is_not_called)
     EXPECT_FALSE(called);
 }
 
+TEST(dtor, valueless_by_exception)
+{
+    bool called = false;
+    {
+        ndgpp::variant<dtor_tracker> v {dtor_tracker{called}};
+        try
+        {
+            v.emplace<0>(throws_on_conversion<dtor_tracker>{});
+            FAIL();
+        }
+        catch (...)
+        {
+            ASSERT_TRUE(called);
+            called = false;
+        }
+
+        ASSERT_TRUE(v.valueless_by_exception());
+    }
+
+    EXPECT_FALSE(called);
+}
+
 TEST(copy_ctor, is_called)
 {
     struct tracker
