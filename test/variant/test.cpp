@@ -163,18 +163,29 @@ struct move_tracker
         called(false)
     {}
 
-    move_tracker& operator=(const move_tracker&)
+    move_tracker& operator=(const move_tracker & other)
     {
+        if (this == &other) {
+            return *this;
+        }
+
         called = false;
+        return *this;
     }
 
     move_tracker(move_tracker&& other):
         called(true)
     {}
 
-    move_tracker& operator=(move_tracker&&)
+    move_tracker& operator=(move_tracker && other)
     {
+        if (this == &other)
+        {
+            return *this;
+        }
+
         called = true;
+        return *this;
     }
 
     bool called {false};
