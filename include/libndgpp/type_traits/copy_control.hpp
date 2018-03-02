@@ -5,16 +5,16 @@
 
 namespace ndgpp
 {
-    namespace detail
+    /// A copy constructible and copy assignable type
+    struct copyable_type {};
+
+    /// A type that is not copy constructible or copy assignable
+    struct non_copyable_type
     {
-        struct copyable_type {};
-        struct non_copyable_type
-        {
-            non_copyable_type() = default;
-            non_copyable_type(const non_copyable_type &) = delete;
-            non_copyable_type & operator=(const non_copyable_type &) = delete;
-        };
-    }
+        non_copyable_type() = default;
+        non_copyable_type(const non_copyable_type &) = delete;
+        non_copyable_type & operator=(const non_copyable_type &) = delete;
+    };
 
     /** Conditionally defines a type that is either copyable or non-copyable
      *
@@ -29,8 +29,8 @@ namespace ndgpp
     template <class ... Ts>
     using copy_control = typename std::conditional<ndgpp::conjunction_type<std::is_copy_constructible<Ts>...>::value &&
                                                    ndgpp::conjunction_type<std::is_copy_assignable<Ts>...>::value,
-                                                   ndgpp::detail::copyable_type,
-                                                   ndgpp::detail::non_copyable_type>::type;
+                                                   ndgpp::copyable_type,
+                                                   ndgpp::non_copyable_type>::type;
 }
 
 #endif

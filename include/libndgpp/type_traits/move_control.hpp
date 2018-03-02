@@ -5,16 +5,16 @@
 
 namespace ndgpp
 {
-    namespace detail
+    /// A move constructible and move assignable type
+    struct moveable_type {};
+
+    /// A type that is not move constructible or move assignable
+    struct non_moveable_type
     {
-        struct moveable_type {};
-        struct non_moveable_type
-        {
-            non_moveable_type() = default;
-            non_moveable_type(const non_moveable_type&) = delete;
-            non_moveable_type& operator=(const non_moveable_type&) = delete;
-        };
-    }
+        non_moveable_type() = default;
+        non_moveable_type(const non_moveable_type&) = delete;
+        non_moveable_type& operator=(const non_moveable_type&) = delete;
+    };
 
     /** Conditionally defines a type that is either movable or non-movable
      *
@@ -29,8 +29,8 @@ namespace ndgpp
     template <class ... Ts>
     using move_control = std::conditional_t<ndgpp::conjunction_type<std::is_move_constructible<Ts>...>::value &&
                                             ndgpp::conjunction_type<std::is_move_assignable<Ts>...>::value,
-                                            ndgpp::detail::moveable_type,
-                                            ndgpp::detail::non_moveable_type>;
+                                            ndgpp::moveable_type,
+                                            ndgpp::non_moveable_type>;
 }
 
 #endif
