@@ -248,6 +248,7 @@ TEST(move_ctor, other_valueless_by_exception)
     try
     {
         v1.emplace<1>(throws_on_conversion<int>{});
+        FAIL();
     }
     catch (...)
     {}
@@ -383,6 +384,7 @@ TEST(move_assign, both_valueless_by_exception)
     try
     {
         v1.emplace<1>(throws_on_conversion<int>{});
+        FAIL();
     }
     catch (...) {}
     ASSERT_TRUE(v1.valueless_by_exception());
@@ -391,6 +393,7 @@ TEST(move_assign, both_valueless_by_exception)
     try
     {
         v2.emplace<1>(throws_on_conversion<int>{});
+        FAIL();
     }
     catch (...) {}
     ASSERT_TRUE(v2.valueless_by_exception());
@@ -410,6 +413,7 @@ TEST(move_assign, other_valueless_by_exception)
     {
         bool tmp = false;
         v2.emplace<1>(throws_on_conversion<dtor_tracker>{});
+        FAIL();
     }
     catch (...) {}
     ASSERT_TRUE(v2.valueless_by_exception());
@@ -426,6 +430,7 @@ TEST(move_assign, this_valueless_by_exception)
     try
     {
         v1.emplace<1>(throws_on_conversion<int>{});
+        FAIL();
     }
     catch (...) {}
     ASSERT_TRUE(v1.valueless_by_exception());
