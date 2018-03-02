@@ -144,6 +144,11 @@ namespace ndgpp
         variant_impl<Ts...>::variant_impl(variant_impl<Ts...>&& other) noexcept(variant_impl::move_ctor_noexcept):
             index(other.index)
         {
+            if (other.valueless_by_exception())
+            {
+                return;
+            }
+
             other.index = variant_npos;
             other.storage_base().move_construct(std::addressof(storage));
         }
