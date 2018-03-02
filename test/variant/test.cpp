@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <functional>
 #include <type_traits>
+#include <stdexcept>
+
 #include <libndgpp/variant.hpp>
 
 struct dtor_tracker
@@ -22,7 +24,7 @@ struct dtor_tracker
 template <class T>
 struct throws_on_conversion
 {
-    operator T () { throw 42; }
+    operator T () { throw std::logic_error("throws_on_conversion"); }
 };
 
 
@@ -294,6 +296,7 @@ TEST(move_assign, other_valueless_by_exception)
     ndgpp::variant<double, dtor_tracker> v2{1.0};
     try
     {
+        bool tmp = false;
         v2.emplace<1>(throws_on_conversion<dtor_tracker>{});
     }
     catch (...) {}
@@ -403,7 +406,7 @@ TEST(member_function, emplace_index_arg_with_exception)
 {
     ndgpp::variant<double, int> v{1};
     const auto will_throw = [&v] () {v.emplace<1>(throws_on_conversion<int>{});};
-    EXPECT_THROW(will_throw(), int);
+    EXPECT_THROW(will_throw(), std::logic_error);
     EXPECT_TRUE(v.valueless_by_exception());
 }
 
