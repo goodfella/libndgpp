@@ -199,7 +199,7 @@ TEST(move_ctor, is_called)
     bool called {false};
     tmp.match(
         [&called] (const bool&) {
-            called = false;
+            FAIL();
         },
         [&called] (const move_tracker& tracker) {
             called = tracker.called;
@@ -236,7 +236,7 @@ TEST(move_ctor, other_with_value)
             correct_value = v == true;
         },
         [&correct_value] (const int) {
-            correct_value = false;
+            FAIL();
         }
     );
 
@@ -256,7 +256,7 @@ TEST(move_assign, different_types)
         bool correct_value = false;
         v1.match(
             [&correct_value] (const int&) {
-                correct_value = false;
+                FAIL();
             },
             [&correct_value] (const double& v) {
                 correct_value = (v == 1.3);
@@ -273,7 +273,7 @@ TEST(move_assign, different_types)
         bool move_called = false;
         v1.match(
             [&move_called] (const int&) {
-                move_called = false;
+                FAIL();
             },
             [&move_called] (const move_tracker& t) {
                 move_called = t.called;
@@ -300,7 +300,7 @@ TEST(move_assign, same_types)
                 correct_value = (v == 2);
             },
             [&correct_value] (const double&) {
-                correct_value = false;
+                FAIL();
             }
         );
 
@@ -314,7 +314,7 @@ TEST(move_assign, same_types)
         bool move_called = false;
         v1.match(
             [&move_called] (const int&) {
-                move_called = false;
+                FAIL();
             },
             [&move_called] (const move_tracker& t) {
                 move_called = t.called;
@@ -390,7 +390,9 @@ TEST(move_assign, this_valueless_by_exception)
         [&correct_value] (const double v) {
             correct_value = (v == 3.0);
         },
-        [] (const int) {}
+        [] (const int) {
+            FAIL();
+        }
     );
 
     EXPECT_TRUE(correct_value);
@@ -455,7 +457,7 @@ TEST(member_function, emplace_index_args)
             proper_type = true;
         },
         [&proper_type] (const int&) {
-            proper_type = false;
+            FAIL();
         }
     );
 
