@@ -112,7 +112,7 @@ namespace ndgpp
         }
 
         template <class ... Ts>
-        variant_impl<Ts...>& variant_impl<Ts...>::operator=(variant_impl<Ts...>&& other) noexcept(variant_impl<Ts...>::move_assign_noexcept)
+        variant_impl<Ts...>& variant_impl<Ts...>::operator=(variant_impl<Ts...>&& other) noexcept(variant_impl::move_assign_noexcept)
         {
             if (this == &other)
             {
