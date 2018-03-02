@@ -147,6 +147,40 @@ TEST(move_ctor, is_called)
     EXPECT_TRUE(called);
 }
 
+TEST(move_ctor, other_valueless_by_exception)
+{
+    ndgpp::variant<bool, int> v1{1};
+    try
+    {
+        v1.emplace<1>(throws_on_conversion<int>{});
+    }
+    catch (...)
+    {}
+
+    ASSERT_TRUE(v1.valueless_by_exception());
+
+    ndgpp::variant<bool, int> v2{std::move(v1)};
+    ASSERT_TRUE(v2.valueless_by_exception());
+}
+
+TEST(move_ctor, other_with_value)
+{
+    ndgpp::variant<bool, int> v1{ndgpp::variant<bool, int>{true}};
+    EXPECT_EQ(0, v1.index());
+
+    bool correct_value = false;
+    v1.match(
+        [&correct_value] (const bool v) {
+            correct_value = v == true;
+        },
+        [&correct_value] (const int) {
+            correct_value = false;
+        }
+    );
+
+    EXPECT_TRUE(correct_value);
+}
+
 TEST(move_assign, different_types)
 {
     {
