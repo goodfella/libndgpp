@@ -37,7 +37,10 @@ namespace ndgpp
 
             variant_impl& operator= (variant_impl<Ts...>&& other) noexcept(move_assign_noexcept);
 
-            variant_impl(variant_impl<Ts...>&& other);
+            static constexpr bool move_ctor_noexcept =
+                ndgpp::conjunction_type<std::is_nothrow_move_constructible<Ts>...>::value;
+
+            variant_impl(variant_impl<Ts...>&& other) noexcept(move_ctor_noexcept);
 
             constexpr bool valueless_by_exception() const noexcept;
 
@@ -138,7 +141,7 @@ namespace ndgpp
         }
 
         template <class ... Ts>
-        variant_impl<Ts...>::variant_impl(variant_impl<Ts...>&& other):
+        variant_impl<Ts...>::variant_impl(variant_impl<Ts...>&& other) noexcept(variant_impl::move_ctor_noexcept):
             index(other.index)
         {
             other.index = variant_npos;
