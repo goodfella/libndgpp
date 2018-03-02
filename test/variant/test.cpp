@@ -276,6 +276,25 @@ TEST(move_ctor, other_with_value)
     EXPECT_TRUE(correct_value);
 }
 
+TEST(move_ctor, noexcept_specifier)
+{
+    {
+        constexpr bool is_noexcept = std::is_nothrow_move_constructible<ndgpp::variant<int, double>>::value;
+        EXPECT_TRUE(is_noexcept);
+    }
+
+    {
+        struct move_construct_throws
+        {
+            move_construct_throws(move_construct_throws &&) { throw std::logic_error{__func__}; }
+            move_construct_throws & operator= (move_construct_throws &&) = default;
+        };
+
+        constexpr bool is_noexcept = std::is_nothrow_move_constructible<ndgpp::variant<int, move_construct_throws>>::value;
+        EXPECT_FALSE(is_noexcept);
+    }
+}
+
 TEST(move_assign, different_types)
 {
     {
