@@ -4,6 +4,8 @@
 #include <stdexcept>
 
 #include <libndgpp/variant.hpp>
+#include <libndgpp/type_traits/conjunction_type.hpp>
+#include <libndgpp/type_traits/copy_control.hpp>
 
 struct dtor_tracker
 {
@@ -153,6 +155,37 @@ TEST(copy_ctor, is_called)
     );
 
     EXPECT_TRUE(called);
+}
+
+TEST(is_copyable, non_copyable_type)
+{
+    using variant_type = ndgpp::variant<ndgpp::non_copyable_type>;
+    constexpr bool copyable = ndgpp::conjunction_type<std::is_copy_constructible<variant_type>>::value;
+    EXPECT_FALSE(copyable);
+}
+
+TEST(is_copyable, copyable_type)
+{
+    using variant_type = ndgpp::variant<ndgpp::copyable_type>;
+    constexpr bool copyable = ndgpp::conjunction_type<std::is_copy_constructible<variant_type>>::value;
+
+    EXPECT_TRUE(copyable);
+}
+
+TEST(is_moveable, non_moveable_type)
+{
+    using variant_type = ndgpp::variant<ndgpp::non_moveable_type>;
+    constexpr bool moveable = ndgpp::conjunction_type<std::is_move_constructible<variant_type>,
+                                                      std::is_move_assignable<variant_type>>::value;
+    EXPECT_FALSE(moveable);
+}
+
+TEST(is_moveable, moveable_type)
+{
+    using variant_type = ndgpp::variant<ndgpp::moveable_type>;
+    constexpr bool moveable = ndgpp::conjunction_type<std::is_move_constructible<variant_type>,
+                                                      std::is_move_assignable<variant_type>>::value;
+    EXPECT_TRUE(moveable);
 }
 
 struct move_tracker
