@@ -103,24 +103,51 @@ TEST(dtor, valueless_by_exception)
     EXPECT_FALSE(called);
 }
 
+struct copy_tracker
+{
+    copy_tracker() = default;
+    copy_tracker(copy_tracker && other):
+        called(false)
+    {}
+
+    copy_tracker(const copy_tracker& other):
+        called(true)
+    {}
+
+    copy_tracker & operator= (const copy_tracker & other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        called = true;
+        return *this;
+    }
+
+    copy_tracker & operator= (copy_tracker && other)
+    {
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        called = false;
+        return *this;
+    }
+
+    bool called {false} ;
+};
+
+
 TEST(copy_ctor, is_called)
 {
-    struct tracker
-    {
-        tracker() = default;
-        tracker(const tracker& other):
-            called(true)
-        {}
-
-        bool called {false} ;
-    };
-
     bool called {false};
-    ndgpp::variant<tracker> other{tracker{}};
-    ndgpp::variant<tracker> copy{other};
+    ndgpp::variant<copy_tracker> other{copy_tracker{}};
+    ndgpp::variant<copy_tracker> copy{other};
 
     copy.match(
-        [&called] (const tracker& tracker) {
+        [&called] (const copy_tracker& tracker) {
             called = tracker.called;
         }
     );
