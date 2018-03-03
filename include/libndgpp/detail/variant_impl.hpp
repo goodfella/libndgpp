@@ -31,16 +31,17 @@ namespace ndgpp
 
             variant_impl(const variant_impl<Ts...>& other);
 
+            static constexpr bool move_ctor_noexcept =
+                ndgpp::conjunction_type<std::is_nothrow_move_constructible<Ts>...>::value;
+
+            variant_impl(variant_impl<Ts...>&& other) noexcept(move_ctor_noexcept);
+
+
             static constexpr bool move_assign_noexcept =
                 ndgpp::conjunction_type<std::is_nothrow_move_constructible<Ts> ...>::value &&
                 ndgpp::conjunction_type<std::is_nothrow_move_assignable<Ts> ...>::value;
 
             variant_impl& operator= (variant_impl<Ts...>&& other) noexcept(move_assign_noexcept);
-
-            static constexpr bool move_ctor_noexcept =
-                ndgpp::conjunction_type<std::is_nothrow_move_constructible<Ts>...>::value;
-
-            variant_impl(variant_impl<Ts...>&& other) noexcept(move_ctor_noexcept);
 
             constexpr bool valueless_by_exception() const noexcept;
 
