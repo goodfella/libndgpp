@@ -17,6 +17,7 @@ namespace ndgpp
             virtual void move_construct(void * storage) {};
 
             virtual void move_assign(void * storage) {};
+            virtual void copy_assign(void * storage) const {};
 
             virtual void * get_ptr() noexcept { return nullptr; };
             virtual void const * get_ptr() const noexcept { return nullptr; };
@@ -61,6 +62,12 @@ namespace ndgpp
                 auto & t = *static_cast<T*>(storage);
                 t = std::move(other);
             }
+
+            static void copy(const T& other, void * storage)
+            {
+                auto & t = *static_cast<T*>(storage);
+                t = other;
+            }
         };
 
         template <class T>
@@ -79,6 +86,7 @@ namespace ndgpp
             void move_construct(void * storage) override;
 
             void move_assign(void * storage) override;
+            void copy_assign(void * storage) const override;
 
             const T& get() const & noexcept;
             T& get() & noexcept;
@@ -166,6 +174,16 @@ namespace ndgpp
                                                 detail::assign_noop<T>>;
 
             assigner::move(std::move(this->get()), storage);
+        }
+
+        template <class T>
+        inline void variant_storage<T>::copy_assign(void * storage) const
+        {
+            using assigner = std::conditional_t<std::is_copy_assignable<value_type>::value,
+                                                detail::assign<T>,
+                                                detail::assign_noop<T>>;
+
+            assigner::copy(this->get(), storage);
         }
     }
 }

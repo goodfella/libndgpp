@@ -29,6 +29,8 @@ namespace ndgpp
                 new (std::addressof(storage)) ndgpp::detail::variant_storage<std::decay_t<U>>(std::forward<U>(u));
             }
 
+            // Copy and move constructors
+
             variant_impl(const variant_impl<Ts...>& other);
 
             static constexpr bool move_ctor_noexcept =
@@ -36,12 +38,17 @@ namespace ndgpp
 
             variant_impl(variant_impl<Ts...>&& other) noexcept(move_ctor_noexcept);
 
+            // Copy and move assignment operators
+
+            variant_impl & operator= (const variant_impl & other);
 
             static constexpr bool move_assign_noexcept =
                 ndgpp::conjunction_type<std::is_nothrow_move_constructible<Ts> ...>::value &&
                 ndgpp::conjunction_type<std::is_nothrow_move_assignable<Ts> ...>::value;
 
             variant_impl& operator= (variant_impl<Ts...>&& other) noexcept(move_assign_noexcept);
+
+            // Misc member functions
 
             constexpr bool valueless_by_exception() const noexcept;
 
@@ -110,6 +117,34 @@ namespace ndgpp
 
             other.storage_base().copy_construct(std::addressof(storage));
             this->index = other.index;
+        }
+
+        template <class ... Ts>
+        variant_impl<Ts...> & variant_impl<Ts...>::operator= (const variant_impl& other)
+        {
+            if (this == &other)
+            {
+                return *this;
+            }
+            else if (this->valueless_by_exception() && other.valueless_by_exception())
+            {
+                return *this;
+            }
+            else if (other.valueless_by_exception())
+            {
+                this->index = ndgpp::variant_npos;
+                this->storage_base().~variant_storage_base();
+            }
+            else if (other.index == this->index)
+            {
+                other.storage_base().copy_assign(this->storage_base().get_ptr());
+            }
+            else
+            {
+                other.match(variant_impl_emplace<Ts, variant_impl>{std::ref(*this)}...);
+            }
+
+            return *this;
         }
 
         template <class ... Ts>

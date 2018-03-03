@@ -474,6 +474,142 @@ TEST(move_assign, noexcept_specifier)
     }
 }
 
+TEST(copy_assign, different_types)
+{
+    ndgpp::variant<bool, double> v1{true};
+    ndgpp::variant<bool, double> v2{1.2};
+
+    const auto & rv = v1 = v2;
+    EXPECT_EQ(1, v1.index());
+    EXPECT_EQ(&v1, &rv);
+
+    bool proper_value = false;
+    v1.match(
+        [] (const bool v) {
+            FAIL();
+        },
+        [&] (const double v) {
+            proper_value = (v == 1.2);
+        }
+    );
+    EXPECT_TRUE(proper_value);
+}
+
+TEST(copy_assign, same_types)
+{
+    {
+        ndgpp::variant<bool, double> v1{true};
+        ndgpp::variant<bool, double> v2{false};
+
+        v1 = v2;
+        EXPECT_EQ(0, v1.index());
+
+        bool proper_value = false;
+        v1.match(
+            [&] (const bool v) {
+                proper_value = (v == false);
+            },
+            [] (const double v) {
+                FAIL();
+            }
+            );
+
+        EXPECT_TRUE(proper_value);
+    }
+
+    {
+        ndgpp::variant<bool, copy_tracker> v1{copy_tracker{}};
+        ndgpp::variant<bool, copy_tracker> v2{copy_tracker{}};
+
+        v1.match(
+            [] (bool) {
+                FAIL();
+            },
+            [&] (const copy_tracker& t) {
+                ASSERT_FALSE(t.called);
+            }
+        );
+
+        v2.match(
+            [] (bool) {
+                FAIL();
+            },
+            [&] (const copy_tracker& t) {
+                ASSERT_FALSE(t.called);
+            }
+        );
+
+        const auto & rv = v1 = v2;
+        EXPECT_EQ(&v1, &rv);
+
+        bool called = false;
+        v1.match(
+            [] (bool) {
+                FAIL();
+            },
+            [&] (const copy_tracker& t) {
+                called = t.called;
+            }
+        );
+
+        EXPECT_TRUE(called);
+    }
+}
+
+TEST(copy_assign, both_valueless_by_exception)
+{
+    ndgpp::variant<double, int> v1{1};
+    try
+    {
+        v1.emplace<1>(throws_on_conversion<int>{});
+        FAIL();
+    }
+    catch (...) {}
+    ASSERT_TRUE(v1.valueless_by_exception());
+
+    ndgpp::variant<double, int> v2{1};
+    try
+    {
+        v2.emplace<1>(throws_on_conversion<int>{});
+        FAIL();
+    }
+    catch (...) {}
+    ASSERT_TRUE(v2.valueless_by_exception());
+
+    const auto & rv = v1 = v2;
+    EXPECT_EQ(&v1, &rv);
+    EXPECT_TRUE(v1.valueless_by_exception());
+}
+
+TEST(copy_assign, this_valueless_by_exception)
+{
+    ndgpp::variant<double, int> v1{1};
+    try
+    {
+        v1.emplace<1>(throws_on_conversion<int>{});
+        FAIL();
+    }
+    catch (...) {}
+    ASSERT_TRUE(v1.valueless_by_exception());
+
+    ndgpp::variant<double, int> v2{1};
+
+    const auto & rv = v1 = v2;
+    EXPECT_EQ(&v1, &rv);
+
+    bool proper_value = false;
+    v1.match(
+        [] (double) {
+            FAIL();
+        },
+        [&] (int v) {
+            proper_value = (v == 1);
+        }
+    );
+
+    EXPECT_TRUE(proper_value);
+}
+
 TEST(member_function, index)
 {
     {
