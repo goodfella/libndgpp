@@ -665,6 +665,37 @@ TEST(member_function, emplace_index_arg_with_exception)
     EXPECT_TRUE(v.valueless_by_exception());
 }
 
+TEST(member_function, emplace_index_multi_member_struct)
+{
+    struct temp
+    {
+        int i;
+        double d;
+    };
+
+    ndgpp::variant<double, temp> v{double{1.0}};
+    const auto & rv = v.emplace<1>(1, 1.0);
+
+    EXPECT_EQ(1, v.index());
+    EXPECT_EQ(1, rv.i);
+    EXPECT_EQ(1.0, rv.d);
+
+    bool proper_i_value = false;
+    bool proper_d_value = false;
+    v.match(
+        [] (double) {
+            FAIL();
+        },
+        [&] (temp t) {
+            proper_i_value = (t.i == 1);
+            proper_d_value = (t.d == 1.0);
+        }
+    );
+
+    EXPECT_TRUE(proper_i_value);
+    EXPECT_TRUE(proper_d_value);
+}
+
 TEST(member_function, operator_bool)
 {
     {

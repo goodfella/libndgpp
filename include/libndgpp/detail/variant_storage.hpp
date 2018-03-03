@@ -77,8 +77,8 @@ namespace ndgpp
 
             using value_type = std::decay_t<T>;
 
-            variant_storage(const value_type& v);
-            variant_storage(value_type&& v);
+            template <class ... Ts>
+            variant_storage(Ts&& ... ts);
 
             ~variant_storage();
 
@@ -101,15 +101,10 @@ namespace ndgpp
         };
 
         template <class T>
-        inline variant_storage<T>::variant_storage(const value_type& v)
+        template <class ... Ts>
+        inline variant_storage<T>::variant_storage(Ts&& ... ts)
         {
-            new (std::addressof(storage_)) value_type(v);
-        }
-
-        template <class T>
-        inline variant_storage<T>::variant_storage(value_type&& v)
-        {
-            new (std::addressof(storage_)) value_type(std::move(v));
+            new (std::addressof(storage_)) value_type{std::forward<Ts>(ts)...};
         }
 
         template <class T>
