@@ -33,9 +33,6 @@ namespace ndgpp
 
         std::size_t index() const noexcept;
 
-        template <class T>
-        bool holds_alternative() const noexcept;
-
         constexpr bool valueless_by_exception() const noexcept;
 
         template <std::size_t I, class ... Args>
@@ -51,21 +48,24 @@ namespace ndgpp
         ndgpp::detail::variant_impl<Ts...> impl_;
     };
 
+    /** Returns true if the variant holds the given alternative
+     *
+     *  @tparam T The alternative type to check.
+     *  @tparam Ts The variant's list of alternatives
+     *
+     *  @param v The variant to check
+     *
+     *  @note The call is ill-formed if T appears more than once
+     */
+    template <class T, class ... Ts>
+    inline
+    constexpr bool holds_alternative(const variant<Ts...>& v) noexcept;
+
     template <class ... Ts>
     inline
     std::size_t variant<Ts...>::index() const noexcept
     {
         return impl_.index;
-    }
-
-    template <class ... Ts>
-    template <class T>
-    inline
-    bool variant<Ts...>::holds_alternative() const noexcept
-    {
-        static_assert(ndgpp::tuple_contains<T, std::tuple<Ts...>>::value,
-                      "T is not an alternative for this variant");
-        return this->index() == ndgpp::tuple_index<T, std::tuple<Ts...>>::value;
     }
 
     template <class ... Ts>
@@ -90,7 +90,7 @@ namespace ndgpp
         static_assert(ndgpp::tuple_contains<ndgpp::none_t, std::tuple<Ts...>>::value,
                       "operator bool is only available with a variant that contains a ndgpp::none_t");
 
-        return !this->holds_alternative<ndgpp::none_t>();
+        return !ndgpp::holds_alternative<ndgpp::none_t>(*this);
     }
 
     template <class ... Ts>
@@ -105,6 +105,15 @@ namespace ndgpp
     void match(const variant<Ts...>& v, const std::function<void (const Ts&)>& ... branches)
     {
         v.match(branches...);
+    }
+
+    template <class T, class ... Ts>
+    inline
+    constexpr bool holds_alternative(const variant<Ts...>& v) noexcept
+    {
+        static_assert(ndgpp::tuple_contains<T, std::tuple<Ts...>>::value,
+                      "T is not an alternative for this variant");
+        return v.index() == ndgpp::tuple_index<T, std::tuple<Ts...>>::value;
     }
 }
 

@@ -627,14 +627,14 @@ TEST(member_function, holds_alternative)
 {
     {
         ndgpp::variant<int, double> v{1};
-        EXPECT_TRUE(v.holds_alternative<int>());
-        EXPECT_FALSE(v.holds_alternative<double>());
+        EXPECT_TRUE(ndgpp::holds_alternative<int>(v));
+        EXPECT_FALSE(ndgpp::holds_alternative<double>(v));
     }
 
     {
         ndgpp::variant<int, double> v{1.0};
-        EXPECT_TRUE(v.holds_alternative<double>());
-        EXPECT_FALSE(v.holds_alternative<int>());
+        EXPECT_TRUE(ndgpp::holds_alternative<double>(v));
+        EXPECT_FALSE(ndgpp::holds_alternative<int>(v));
     }
 }
 
