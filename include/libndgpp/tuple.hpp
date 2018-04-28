@@ -58,6 +58,15 @@ namespace ndgpp
     {
         static constexpr bool value = tuple_contains<T, std::tuple<Ts...>>::value;
     };
+
+    template <class T>
+    struct tuple_types_car {};
+
+    template <class T, class ... Ts>
+    struct tuple_types_car<std::tuple<T, Ts...>>
+    {
+        using type = T;
+    };
 }
 
 #endif

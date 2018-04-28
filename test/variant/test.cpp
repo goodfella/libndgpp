@@ -717,3 +717,162 @@ TEST(member_function, operator_bool)
         foo& operator=(foo&&) = default;
     };
 }
+
+TEST(const_visit, no_throw)
+{
+    constexpr int i = 1;
+    using variant_t = ndgpp::variant<short, int, long long>;
+    variant_t v{i};
+    const auto func = [] (auto v) -> void{
+        using type = decltype(v);
+        constexpr bool correct_type = std::is_same<type, int>::value;
+        EXPECT_TRUE(correct_type);
+    };
+
+    ndgpp::visit(func, const_cast<const variant_t &>(v));
+}
+
+TEST(const_visit, returning_visitor)
+{
+    constexpr int i = 1;
+    using variant_t = ndgpp::variant<short, int, long long>;
+    variant_t v{i};
+    const auto func = [] (auto v) -> bool {
+        using type = std::decay_t<decltype(v)>;
+        constexpr bool correct_type = std::is_same<type, int>::value;
+        EXPECT_TRUE(correct_type);
+        return correct_type;
+    };
+
+    const auto ret = ndgpp::visit(func, const_cast<const variant_t &>(v));
+    EXPECT_TRUE(ret);
+}
+
+TEST(const_visit, throws)
+{
+    using variant_t = ndgpp::variant<bool>;
+    variant_t v {false};
+    try
+    {
+        v.emplace<0>(throws_on_conversion<bool>{});
+        // It's considered a test failure if the above statement does
+        // not throw.
+        FAIL();
+    }
+    catch (...)
+    {}
+
+    ASSERT_TRUE(v.valueless_by_exception());
+
+    const auto func = [] (auto v) -> void{
+        // If this function is ever called by visit, then it's
+        // considered a failure because the visitor should not be
+        // called with a valueless_by_exception variant
+        FAIL();
+    };
+
+    const auto throws = [&] () {
+        ndgpp::visit(func, const_cast<const variant_t &>(v));
+
+        // ndgpp::visit should never return because it's expected to
+        // throw an exception.
+        FAIL();
+    };
+
+    EXPECT_THROW(throws(), ndgpp::bad_variant_access);
+}
+
+TEST(const_visit, make_visitor)
+{
+    constexpr int i = 1;
+    using variant_t = ndgpp::variant<short, int>;
+    variant_t v{i};
+
+
+    const bool ret = ndgpp::visit(ndgpp::make_visitor(
+                                      [](short){return false;},
+                                      [](int){return true;}),
+                                  const_cast<const variant_t &>(v));
+
+    EXPECT_TRUE(ret);
+}
+
+
+TEST(visit, no_throw)
+{
+    constexpr int i = 1;
+    using variant_t = ndgpp::variant<short, int, long long>;
+    variant_t v{i};
+    const auto func = [] (auto v) -> void{
+        using type = decltype(v);
+        constexpr bool correct_type = std::is_same<type, int>::value;
+        EXPECT_TRUE(correct_type);
+    };
+
+    ndgpp::visit(func, v);
+}
+
+TEST(visit, returning_visitor)
+{
+    constexpr int i = 1;
+    using variant_t = ndgpp::variant<short, int, long long>;
+    variant_t v{i};
+    const auto func = [] (auto v) -> bool {
+        using type = std::decay_t<decltype(v)>;
+        constexpr bool correct_type = std::is_same<type, int>::value;
+        EXPECT_TRUE(correct_type);
+        return correct_type;
+    };
+
+    const auto ret = ndgpp::visit(func, v);
+    EXPECT_TRUE(ret);
+}
+
+TEST(visit, throws)
+{
+    using variant_t = ndgpp::variant<bool>;
+    variant_t v {false};
+    try
+    {
+        v.emplace<0>(throws_on_conversion<bool>{});
+        // It's considered a test failure if the above statement does
+        // not throw.
+        FAIL();
+    }
+    catch (...)
+    {}
+
+    ASSERT_TRUE(v.valueless_by_exception());
+
+    const auto func = [] (auto v) -> void{
+        // If this function is ever called by visit, then it's
+        // considered a failure because the visitor should not be
+        // called with a valueless_by_exception variant
+        FAIL();
+    };
+
+    const auto throws = [&] () {
+        ndgpp::visit(func, v);
+
+        // ndgpp::visit should never return because it's expected to
+        // throw an exception.
+        FAIL();
+    };
+
+    EXPECT_THROW(throws(), ndgpp::bad_variant_access);
+}
+
+TEST(visit, make_visitor)
+{
+    constexpr int i = 1;
+    using variant_t = ndgpp::variant<short, int>;
+    variant_t v{i};
+
+
+    const bool ret = ndgpp::visit(ndgpp::make_visitor(
+                                      [](short){return false;},
+                                      [](int){return true;}),
+                                  v);
+
+    EXPECT_TRUE(ret);
+}
