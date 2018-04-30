@@ -3,6 +3,8 @@
 
 #include <ostream>
 
+#include "preprocessor.hpp"
+
 // This header file can be found in the binary directory
 #include <libndgpp/parent_directory_name_length.hpp>
 
@@ -15,7 +17,7 @@ namespace ndgpp
      *  @param file The file name
      */
     template <std::size_t N>
-    char const * relative_file(const char (&file) [N])
+    constexpr char const * relative_file(const char (&file) [N])
     {
         // one is added to account for the trailing directory separator
         static_assert(N > (ndgpp::parent_directory_name_length_t::value + 1),
@@ -29,8 +31,8 @@ namespace ndgpp
         public:
 
         template <std::size_t N>
-        source_location(const char (&file) [N],
-                        const int line):
+        constexpr source_location(const char (&file) [N],
+                                  const int line) noexcept:
             file_(ndgpp::relative_file(file)),
             line_(line)
             {}
@@ -40,8 +42,8 @@ namespace ndgpp
 
         private:
 
-        char const * file_ = "none";
-        int line_ = {-1};
+        char const * file_ = ndgpp::relative_file(__FILE__);
+        int line_ = __LINE__;
     };
 
     inline int source_location::line() const noexcept
@@ -64,5 +66,6 @@ namespace ndgpp
 }
 
 #define NDGPP_SOURCE_LOCATION ndgpp::source_location{__FILE__, __LINE__}
+#define NDGPP_SOURCE_LOCATION_STR ndgpp::relative_file(__FILE__ ":" NDGPP_STRINGIZE(__LINE__))
 
 #endif
