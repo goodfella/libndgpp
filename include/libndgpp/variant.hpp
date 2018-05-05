@@ -49,7 +49,7 @@ namespace ndgpp
         {}
 
         template <class U, class X = ndgpp::disable_if_same_or_derived<variant<Ts...>, std::decay_t<U>>>
-        variant(U&& u):
+        constexpr variant(U&& u) noexcept(std::is_nothrow_constructible<std::decay_t<U>>::value):
             impl_(std::forward<U>(u))
         {}
 
