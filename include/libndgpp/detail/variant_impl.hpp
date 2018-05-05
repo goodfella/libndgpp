@@ -23,6 +23,13 @@ namespace ndgpp
         struct variant_impl
         {
             std::size_t index;
+            using first_type = std::tuple_element_t<0, std::tuple<Ts...>>;
+
+            variant_impl():
+                index(0)
+            {
+                new (std::addressof(storage)) ndgpp::detail::variant_storage<std::decay_t<first_type>>();
+            }
 
             template <class U, class X = ndgpp::disable_if_same_or_derived<variant_impl<Ts...>, std::decay_t<U>>>
             variant_impl(U&& u):

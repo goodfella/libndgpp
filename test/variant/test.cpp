@@ -62,6 +62,26 @@ TEST(variant_alternative, helper_alias)
     EXPECT_TRUE(test_2);
 }
 
+struct not_default_constructible
+{
+    not_default_constructible() = delete;
+    not_default_constructible(int i) {}
+};
+
+TEST(default_ctor, non_existent)
+{
+    using variant_t = ndgpp::variant<not_default_constructible, ndgpp::monostate>;
+    constexpr bool value = std::is_default_constructible<variant_t>::value;
+    EXPECT_FALSE(value);
+}
+
+TEST(default_ctor, exists)
+{
+    using variant_t = ndgpp::variant<ndgpp::monostate, not_default_constructible>;
+    constexpr bool value = std::is_default_constructible<variant_t>::value;
+    EXPECT_TRUE(value);
+}
+
 TEST(dtor, is_called)
 {
 
@@ -699,23 +719,14 @@ TEST(member_function, emplace_index_multi_member_struct)
 TEST(member_function, operator_bool)
 {
     {
-        ndgpp::variant<ndgpp::none_t, int> v{1};
+        ndgpp::variant<ndgpp::monostate, int> v{1};
         EXPECT_TRUE(static_cast<bool>(v));
     }
 
     {
-        ndgpp::variant<ndgpp::none_t, int> v{ndgpp::none};
+        ndgpp::variant<ndgpp::monostate, int> v{};
         EXPECT_FALSE(static_cast<bool>(v));
     }
-
-    struct foo
-    {
-        foo(const foo&) = delete;
-        foo& operator=(const foo&) = delete;
-
-        foo(foo&&) = default;
-        foo& operator=(foo&&) = default;
-    };
 }
 
 TEST(const_visit, no_throw)

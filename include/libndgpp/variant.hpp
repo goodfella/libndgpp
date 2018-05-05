@@ -18,8 +18,7 @@
 
 namespace ndgpp
 {
-    struct none_t {};
-    static constexpr none_t none{};
+    struct monostate {};
 
     struct bad_variant_access: public std::runtime_error
     {
@@ -40,7 +39,14 @@ namespace ndgpp
         public ndgpp::copy_control<Ts...>,
         public ndgpp::move_control<Ts...>
     {
+        using first_type = std::tuple_element_t<0, std::tuple<Ts...>>;
+
         public:
+
+        template <bool B = std::is_default_constructible<first_type>::value,
+                  typename std::enable_if<B, int>::type = 0>
+        constexpr variant() noexcept(std::is_nothrow_default_constructible<first_type>::value)
+        {}
 
         template <class U, class X = ndgpp::disable_if_same_or_derived<variant<Ts...>, std::decay_t<U>>>
         variant(U&& u):
@@ -168,10 +174,10 @@ namespace ndgpp
     inline
     variant<Ts...>::operator bool() const noexcept
     {
-        static_assert(ndgpp::tuple_contains<ndgpp::none_t, std::tuple<Ts...>>::value,
-                      "operator bool is only available with a variant that contains a ndgpp::none_t");
+        static_assert(ndgpp::tuple_contains<ndgpp::monostate, std::tuple<Ts...>>::value,
+                      "operator bool is only available with a variant that contains a ndgpp::monostate");
 
-        return !ndgpp::holds_alternative<ndgpp::none_t>(*this);
+        return !ndgpp::holds_alternative<ndgpp::monostate>(*this);
     }
 
     template <class ... Ts>
