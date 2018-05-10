@@ -11,11 +11,19 @@
 #include <libndgpp/variant_alternative.hpp>
 #include <libndgpp/type_traits/conjunction_type.hpp>
 #include <libndgpp/sfinae.hpp>
+#include <libndgpp/source_location.hpp>
 #include "variant_storage.hpp"
 
 namespace ndgpp
 {
     constexpr std::size_t variant_npos = std::numeric_limits<std::size_t>::max();
+
+    struct bad_variant_access: public std::runtime_error
+    {
+        bad_variant_access(const char * what):
+            std::runtime_error(what)
+        {}
+    };
 
     namespace detail
     {
@@ -25,14 +33,14 @@ namespace ndgpp
             std::size_t index;
             using first_type = std::tuple_element_t<0, std::tuple<Ts...>>;
 
-            variant_impl():
+            constexpr variant_impl():
                 index(0)
             {
                 new (std::addressof(storage)) ndgpp::detail::variant_storage<std::decay_t<first_type>>();
             }
 
             template <class U, class X = ndgpp::disable_if_same_or_derived<variant_impl<Ts...>, std::decay_t<U>>>
-            variant_impl(U&& u):
+            constexpr variant_impl(U&& u):
                 index(ndgpp::tuple_index<std::decay_t<U>, std::tuple<Ts...>>::value)
             {
                 new (std::addressof(storage)) ndgpp::detail::variant_storage<std::decay_t<U>>(std::forward<U>(u));
@@ -79,40 +87,32 @@ namespace ndgpp
             template <std::size_t I>
             const ndgpp::detail::variant_storage<std::tuple_element_t<I, std::tuple<Ts...>>>& get() const & noexcept;
 
-            void match(const std::function<void (const Ts&)>& ... branches) const &;
-            void match(const std::function<void (Ts&&)>& ... branches) &&;
+            template <class Visitor>
+            std::result_of_t<Visitor(variant_alternative_t<0, variant_impl<Ts...>>)>
+            visit(Visitor&& visitor, std::integer_sequence<std::size_t>) const &;
 
-            void matcher() const &;
-            void matcher() &&;
+            template <class Visitor, std::size_t ... I>
+            decltype(auto)
+            visit(Visitor&& visitor, std::index_sequence<I...>) const &;
 
-            template <class U, class ... Us>
-            void matcher(const std::function<void (const U&)>& branch,
-                         const std::function<void (const Us&)>& ... branches) const &;
+            template <class Visitor>
+            decltype(auto)
+            visit(Visitor&& visitor) const &;
 
-            template <class U, class ... Us>
-            void matcher(const std::function<void (U&&)>& branch,
-                         const std::function<void (Us&&)>& ... branches) &&;
+
+            template <class Visitor>
+            std::result_of_t<Visitor(variant_alternative_t<0, variant_impl<Ts...>>)>
+            visit(Visitor&& visitor, std::integer_sequence<std::size_t>) &&;
+
+            template <class Visitor, std::size_t ... I>
+            decltype(auto)
+            visit(Visitor&& visitor, std::index_sequence<I...>) &&;
+
+            template <class Visitor>
+            decltype(auto)
+            visit(Visitor&& visitor) &&;
 
             std::aligned_union_t<0, ndgpp::detail::variant_storage_base, ndgpp::detail::variant_storage<Ts>...> storage;
-        };
-
-        template <class T, class ... Ts>
-        struct variant_impl_emplace;
-
-        template <class T, class ... Ts>
-        struct variant_impl_emplace<T, variant_impl<Ts...>>
-        {
-            void operator() (T&& t)
-            {
-                variant.get().template emplace<ndgpp::tuple_index<T, std::tuple<Ts...>>::value>(std::move(t));
-            }
-
-            void operator() (const T& t)
-            {
-                variant.get().template emplace<ndgpp::tuple_index<T, std::tuple<Ts...>>::value>(t);
-            }
-
-            std::reference_wrapper<variant_impl<Ts...>> variant;
         };
 
         template <class ... Ts>
@@ -150,7 +150,12 @@ namespace ndgpp
             }
             else
             {
-                other.match(variant_impl_emplace<Ts, variant_impl>{std::ref(*this)}...);
+                const auto visitor = [this](const auto & v) {
+                    using T = std::decay_t<decltype(v)>;
+                    this->template emplace<ndgpp::tuple_index<T, std::tuple<Ts...>>::value>(v);
+                };
+
+                other.visit(visitor);
             }
 
             return *this;
@@ -178,8 +183,12 @@ namespace ndgpp
             }
             else
             {
-                using variant_type = variant_impl<Ts...>;
-                std::move(other).match(variant_impl_emplace<Ts, variant_type>{std::ref(*this)}...);
+                const auto visitor = [this](auto && v) {
+                    using T = std::decay_t<decltype(v)>;
+                    this->template emplace<ndgpp::tuple_index<T, std::tuple<Ts...>>::value>(std::move(v));
+                };
+
+                std::move(other).visit(visitor);
             }
 
             return *this;
@@ -276,59 +285,81 @@ namespace ndgpp
         }
 
         template <class ... Ts>
-        inline
-        void variant_impl<Ts...>::matcher() const &
-        {}
-
-        template <class ... Ts>
-        inline
-        void variant_impl<Ts...>::matcher() &&
-        {}
-
-        template <class ... Ts>
-        template <class U, class ... Us>
-        inline
-        void variant_impl<Ts...>::matcher(const std::function<void (const U&)>& branch,
-                                          const std::function<void (const Us&)>& ... branches) const &
+        template <class Visitor>
+        std::result_of_t<Visitor(variant_alternative_t<0, variant_impl<Ts...>>)>
+        variant_impl<Ts...>::visit(Visitor&& visitor, std::integer_sequence<std::size_t>) const &
         {
-            if (ndgpp::tuple_index<U, std::tuple<Ts...>>::value == this->index)
+            throw bad_variant_access{NDGPP_SOURCE_LOCATION_STR};
+        }
+
+        template <class ... Ts>
+        template <class Visitor, std::size_t ... I>
+        decltype(auto)
+        variant_impl<Ts...>::visit(Visitor && visitor, std::index_sequence<I...>) const &
+        {
+            constexpr std::size_t index = sizeof...(I) - 1;
+            if (this->index == index)
             {
-                branch(this->get<ndgpp::tuple_index<U, std::tuple<Ts...>>::value>().get());
+                // The variant contains the alternative at index I, so
+                // visit it.
+                return std::forward<Visitor>(visitor)(this->get<index>().get());
             }
             else
             {
-                matcher(branches...);
+                // The variant does not contain the alternative at
+                // index I, so try the next index.  The "next index"
+                // is generated by creating a std::index_sequence with
+                // one less std::size_t template parameter.
+                return this->visit(std::forward<Visitor>(visitor), std::make_index_sequence<index>());
             }
         }
 
         template <class ... Ts>
-        template <class U, class ... Us>
-        inline
-        void variant_impl<Ts...>::matcher(const std::function<void (U&&)>& branch,
-                                          const std::function<void (Us&&)>& ... branches) &&
+        template <class Visitor>
+        decltype(auto)
+        variant_impl<Ts...>::visit(Visitor && visitor) const &
         {
-            if (ndgpp::tuple_index<U, std::tuple<Ts...>>::value == this->index)
+            return this->visit(std::forward<Visitor>(visitor), std::make_index_sequence<sizeof...(Ts)>());
+        }
+
+
+
+        template <class ... Ts>
+        template <class Visitor>
+        std::result_of_t<Visitor(variant_alternative_t<0, variant_impl<Ts...>>)>
+        variant_impl<Ts...>::visit(Visitor&& visitor, std::integer_sequence<std::size_t>) &&
+        {
+            throw bad_variant_access{NDGPP_SOURCE_LOCATION_STR};
+        }
+
+        template <class ... Ts>
+        template <class Visitor, std::size_t ... I>
+        decltype(auto)
+        variant_impl<Ts...>::visit(Visitor && visitor, std::index_sequence<I...>) &&
+        {
+            constexpr std::size_t index = sizeof...(I) - 1;
+            if (this->index == index)
             {
-                branch(std::move(*this).get<ndgpp::tuple_index<U, std::tuple<Ts...>>::value>().get());
+                // The variant contains the alternative at index I, so
+                // visit it.
+                return std::forward<Visitor>(visitor)(std::move(*this).get<index>().get());
             }
             else
             {
-                std::move(*this).matcher(branches...);
+                // The variant does not contain the alternative at
+                // index I, so try the next index.  The "next index"
+                // is generated by creating a std::index_sequence with
+                // one less std::size_t template parameter.
+                return std::move(*this).visit(std::forward<Visitor>(visitor), std::make_index_sequence<index>());
             }
         }
 
         template <class ... Ts>
-        inline
-        void variant_impl<Ts...>::match(const std::function<void (const Ts&)>& ... branches) const &
+        template <class Visitor>
+        decltype(auto)
+        variant_impl<Ts...>::visit(Visitor && visitor) &&
         {
-            matcher(branches...);
-        }
-
-        template <class ... Ts>
-        inline
-        void variant_impl<Ts...>::match(const std::function<void (Ts&&)>& ... branches) &&
-        {
-            std::move(*this).matcher(branches...);
+            return std::move(*this).visit(std::forward<Visitor>(visitor), std::make_index_sequence<sizeof...(Ts)>());
         }
     }
 }
