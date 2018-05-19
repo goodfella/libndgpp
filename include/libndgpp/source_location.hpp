@@ -65,7 +65,7 @@ namespace ndgpp
     }
 }
 
-#define NDGPP_SOURCE_LOCATION ndgpp::source_location{__FILE__, __LINE__}
-#define NDGPP_SOURCE_LOCATION_STR ndgpp::relative_file(__FILE__ ":" NDGPP_STRINGIZE(__LINE__))
+#define ndgpp_source_location ndgpp::source_location{__FILE__, __LINE__}
+#define ndgpp_source_location_str ndgpp::relative_file(__FILE__ ":" NDGPP_STRINGIZE(__LINE__))
 
 #endif

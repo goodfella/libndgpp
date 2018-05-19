@@ -49,7 +49,7 @@ namespace ndgpp
 
         const inner_exception_type& inner_exception() const noexcept;
 
-        char const * what() const noexcept;
+        char const * what() const noexcept override;
 
         private:
 
@@ -63,6 +63,6 @@ namespace ndgpp
     }
 }
 
-#define NDGPP_ERROR(inner, ...) ndgpp::error<inner>(NDGPP_SOURCE_LOCATION, ##__VA_ARGS__)
+#define ndgpp_error(inner, ...) ndgpp::error<inner>(ndgpp_source_location, ##__VA_ARGS__)
 
 #endif
