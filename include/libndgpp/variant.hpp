@@ -216,7 +216,7 @@ namespace ndgpp
 
     template <class ... Ts>
     inline
-    std::size_t variant<Ts...>::index() const noexcept
+    constexpr std::size_t variant<Ts...>::index() const noexcept
     {
         return impl_.index;
     }
