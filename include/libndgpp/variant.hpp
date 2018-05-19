@@ -27,6 +27,33 @@ namespace ndgpp
         visit_types(Visitor&& visitor, const variant<Us...>& v, std::index_sequence<I...>);
     }
 
+    /** Type safe union based on std::variant
+     *
+     *  @tparam Ts The types that may be stored in this variant. All
+     *             types must be (possibly cv-qualified) non-array
+     *             object types.
+     *
+     *  An instance of std::variant at any given time either holds a
+     *  value of one of its alternative types, or in the case of error
+     *  - no value (this state is hard to achieve, see
+     *  ndgpp::valueless_by_exception).
+     *
+     *  As with unions, if a variant holds a value of some object type
+     *  T, the object representation of T is allocated directly within
+     *  the object representation of the variant itself. Variant is
+     *  not allowed to allocate additional (dynamic) memory.
+     *
+     *  A variant is not permitted to hold references, arrays, or the
+     *  type void. Empty variants are also ill-formed
+     *  (ndgpp::variant<ndgpp::monostate> can be used instead).
+     *
+     *  Consistent with the behavior of unions during aggregate
+     *  initialization, a default-constructed variant holds a value of
+     *  its first alternative, unless that alternative is not
+     *  default-constructible (in which case the variant is not
+     *  default-constructible either). The helper class std::monostate
+     *  can be used to make such variants default-constructible.
+     */
     template <class ... Ts>
     class variant:
         public ndgpp::copy_control<Ts...>,
@@ -36,23 +63,66 @@ namespace ndgpp
 
         public:
 
+        /** Default constructs a variant
+         *
+         *  Constructs a variant holding the value-initialized value
+         *  of the first alternative (index() is zero). This
+         *  constructor is constexpr if and only if the value
+         *  initialization of the alternative type T_0 would satisfy
+         *  the requirements for a constexpr function. This overload
+         *  only participates in overload resolution if
+         *  std::is_default_constructible_v<T_0> is true.
+         */
         template <bool B = std::is_default_constructible<first_type>::value,
                   typename std::enable_if<B, int>::type = 0>
         constexpr variant() noexcept(std::is_nothrow_default_constructible<first_type>::value)
         {}
 
+        /** Converting constructor
+         *
+         *  @tparam U The type the variant will be constructed with
+         *
+         */
         template <class U, class X = ndgpp::disable_if_same_or_derived<variant<Ts...>, std::decay_t<U>>>
         constexpr variant(U&& u) noexcept(std::is_nothrow_constructible<std::decay_t<U>>::value):
             impl_(std::forward<U>(u))
         {}
 
-        std::size_t index() const noexcept;
+        /**
+         * @breif Returns the alternative index the variant contains
+         *        or ndgpp::variant_npos if the variant is
+         *        valuess_by_exception.
+         */
+        constexpr std::size_t index() const noexcept;
 
+        /// Returns true if the variant is valueless_by_exception
         constexpr bool valueless_by_exception() const noexcept;
 
+        /** Creates a new value in-place, in an existing variant object
+         *
+         *  @tparam I The index of the type to create
+         *  @tparam Args The types of the parameters used to construct type T_I
+         *
+         *  @param args The parameters used to construct type T_I
+         *
+         *  First, destroys the currently contained value (if
+         *  any). Then direct-initializes the contained value as if
+         *  constructing a value of type T_I with the arguments
+         *  std::forward<Args>(args).... If an exception is thrown,
+         *  *this may become valueless_by_exception. This overload
+         *  only participates in overload resolution if
+         *  std::is_constructible_v<T_I, Args...> is true. The
+         *  behavior is undefined if I is not less than
+         *  sizeof...(Types)
+         */
         template <std::size_t I, class ... Args>
         variant_alternative_t<I, variant<Ts...>>& emplace(Args&& ... args);
 
+        /** Returns true if the variant holds a ndgpp::monostate, false otherwise
+         *
+         *  This member function is only available if one of the
+         *  variant's types is a ndgpp::monostate.
+         */
         explicit
         operator bool() const noexcept;
 
