@@ -15,3 +15,4 @@ add_subdirectory(ios)
 add_subdirectory(type_traits)
 
 libndgpp_test(tuple/test.cpp)
+libndgpp_test(safe-ops/test.cpp)
