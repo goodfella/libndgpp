@@ -6,7 +6,7 @@ string(LENGTH ${CMAKE_SOURCE_DIR} CMAKE_SOURCE_DIR_LENGTH)
 configure_file(include/libndgpp/parent_directory_name_length.hpp.in
   include/libndgpp/parent_directory_name_length.hpp)
 
-set(ndgpp_compile_flags -pedantic -Wall)
+set(ndgpp_compile_flags -pedantic -Wall -Werror)
 add_library(ndgpp INTERFACE)
 target_compile_options(ndgpp INTERFACE -std=c++14)
 target_include_directories(ndgpp INTERFACE
