@@ -18,7 +18,7 @@ namespace safe_op
      *  @param rhs The right operand
      */
     template <class Lhs, class Rhs>
-    inline auto lt(const Lhs lhs, const Rhs rhs) ->
+    inline constexpr auto lt(const Lhs lhs, const Rhs rhs) noexcept ->
         std::enable_if_t<std::is_integral<Lhs>::value &&
                          std::is_integral<Rhs>::value,
                          bool>
@@ -37,7 +37,7 @@ namespace safe_op
      *  @param rhs The right operand
      */
     template <class Lhs, class Rhs>
-    inline auto gt(const Lhs lhs, const Rhs rhs) ->
+    inline constexpr auto gt(const Lhs lhs, const Rhs rhs) noexcept ->
         std::enable_if_t<std::is_integral<Lhs>::value &&
                          std::is_integral<Rhs>::value,
                          bool>
@@ -56,7 +56,7 @@ namespace safe_op
      *  @param rhs The right operand
      */
     template <class Lhs, class Rhs>
-    inline auto lte(const Lhs lhs, const Rhs rhs) ->
+    inline auto constexpr lte(const Lhs lhs, const Rhs rhs) noexcept ->
         std::enable_if_t<std::is_integral<Lhs>::value &&
                          std::is_integral<Rhs>::value,
                          bool>
@@ -75,7 +75,7 @@ namespace safe_op
      *  @param rhs The right operand
      */
     template <class Lhs, class Rhs>
-    inline auto gte(const Lhs lhs, const Rhs rhs) ->
+    inline auto constexpr gte(const Lhs lhs, const Rhs rhs) noexcept ->
         std::enable_if_t<std::is_integral<Lhs>::value &&
                          std::is_integral<Rhs>::value,
                          bool>
