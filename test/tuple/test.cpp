@@ -28,19 +28,19 @@ TEST(tuple_index, first_type)
 {
     using tuple_type = std::tuple<int, double, bool>;
     constexpr auto index = ndgpp::tuple_index<int, tuple_type>::value;
-    EXPECT_EQ(0, index);
+    EXPECT_EQ(0U, index);
 }
 
 TEST(tuple_index, middle_type)
 {
     using tuple_type = std::tuple<int, double, bool>;
     constexpr auto index = ndgpp::tuple_index<double, tuple_type>::value;
-    EXPECT_EQ(1, index);
+    EXPECT_EQ(1U, index);
 }
 
 TEST(tuple_index, last_type)
 {
     using tuple_type = std::tuple<int, double, bool>;
     constexpr auto index = ndgpp::tuple_index<bool, tuple_type>::value;
-    EXPECT_EQ(2, index);
+    EXPECT_EQ(2U, index);
 }
