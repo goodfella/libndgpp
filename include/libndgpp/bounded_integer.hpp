@@ -305,7 +305,7 @@ namespace ndgpp
     inline bool operator < (const bounded_integer<T, Min, Max, Tag> lhs,
                             const bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return ndgpp::safe_op::lt(lhs.get(), rhs.get());
+        return lhs.get() < rhs.get();
     }
 
     template <class T, T Min, T Max, class Tag, class U>
