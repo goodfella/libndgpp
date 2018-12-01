@@ -36,7 +36,7 @@ namespace ndgpp
      *  @tparam T The type of integer to convert the string to
      *  @tparam DelimIter The delimiter iterator type
      *  @tparam Min The minimum valued allowed
-     *  @tparma Max The maximum value allowed
+     *  @tparam Max The maximum value allowed
      *
      *  @param str The string to convert
      *
