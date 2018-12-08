@@ -98,14 +98,14 @@ namespace ndgpp
          *  @param v The std::integral_constant instance
          */
         template <class U, U Val>
-        explicit constexpr bounded_integer(std::integral_constant<U, Val> v) noexcept;
+        constexpr bounded_integer(std::integral_constant<U, Val> v) noexcept;
 
         /** Constructs a bounded_integer
          *
          *  @param value The value to assign the bounded_integer to
          */
         template <class U>
-        explicit bounded_integer(const U value);
+        bounded_integer(const U value);
 
         /** Constructs a bounded integer from a C string
          *
@@ -118,6 +118,7 @@ namespace ndgpp
          *  @param last The last element in the iterator range
          */
         template <class DelimIter>
+        explicit
         bounded_integer(char const * const str,
                         const std::size_t pos,
                         const int base,
@@ -148,6 +149,7 @@ namespace ndgpp
          *  @param last The last element in the iterator range
          */
         template <class DelimIter>
+        explicit
         bounded_integer(const std::string& str,
                         const std::size_t pos,
                         const int base,
