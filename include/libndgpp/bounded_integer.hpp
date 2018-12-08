@@ -81,13 +81,13 @@ namespace ndgpp
         /// Returns the maximum value this bounded_integer can represent
         static constexpr value_type max() noexcept {return Max;}
 
-        /// Constructs a bounded integer with its minimum allowed value
+        /// Constructs a bounded integer assigned to the minimum allowed value
         constexpr bounded_integer() noexcept;
 
-        /// Constructs a bounded integer with its minimum allowed value
+        /// Constructs a bounded integer assigned to the minimum allowed value
         constexpr bounded_integer (bounded_integer_min_t) noexcept;
 
-        /// Constructs a bounded integer with its maximum allowed value
+        /// Constructs a bounded integer assigned to the maximum allowed value
         constexpr bounded_integer (bounded_integer_max_t) noexcept;
 
         /** Constructs a bounded_integer given a compile time constant
