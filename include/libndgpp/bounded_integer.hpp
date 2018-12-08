@@ -82,6 +82,9 @@ namespace ndgpp
         static constexpr value_type max() noexcept {return Max;}
 
         /// Constructs a bounded integer with its minimum allowed value
+        constexpr bounded_integer() noexcept;
+
+        /// Constructs a bounded integer with its minimum allowed value
         constexpr bounded_integer (bounded_integer_min_t) noexcept;
 
         /// Constructs a bounded integer with its maximum allowed value
@@ -180,6 +183,9 @@ namespace ndgpp
 
         value_type value_ = Min;
     };
+
+    template <class T, T Min, T Max, class Tag>
+    constexpr bounded_integer<T, Min, Max, Tag>::bounded_integer() noexcept = default;
 
     template <class T, T Min, T Max, class Tag>
     bounded_integer<T, Min, Max, Tag>::bounded_integer(const bounded_integer&) noexcept = default;
