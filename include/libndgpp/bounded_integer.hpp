@@ -55,14 +55,21 @@ namespace ndgpp
      *
      *  @tparam T The underlying integer type
      *
-     *  @tparam Min The minimal value this type is allowed to represent
+     *  @tparam Min The minimal value this type is allowed to
+     *              represent.  Defaults to
+     *              std::numeric_limits<T>::min()
      *
-     *  @tparam Max The maximum value this type is allowed to represent
+     *  @tparam Max The maximum value this type is allowed to
+     *              represent.  Defaults to
+     *              std::numeric_limits<T>::max()
      *
      *  @tparam Tag Allows for differentiating between two
      *          bounded_integer types with the same ranges.
      */
-    template <class T, T Min, T Max, class Tag = void>
+    template <class T,
+              T Min = std::numeric_limits<T>::min(),
+              T Max = std::numeric_limits<T>::max(),
+              class Tag = void>
     class bounded_integer final
     {
         public:
