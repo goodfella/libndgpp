@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.5.1)
 project(libndgpp CXX)
 
-string(LENGTH ${CMAKE_SOURCE_DIR} CMAKE_SOURCE_DIR_LENGTH)
+string(LENGTH ${CMAKE_SOURCE_DIR} LIBNDGPP_SOURCE_DIR_LENGTH)
 
 configure_file(include/libndgpp/parent_directory_name_length.hpp.in
   include/libndgpp/parent_directory_name_length.hpp)
