@@ -349,3 +349,63 @@ TEST(swap_test, correctness)
     EXPECT_EQ(2, b1.get());
     EXPECT_EQ(1, b2.get());
 }
+
+TEST(assignment, integral)
+{
+    using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
+    bounded_integer b{2};
+
+    b = 1;
+    EXPECT_EQ(1, b.get());
+
+    b = 2U;
+    EXPECT_EQ(2, b.get());
+
+    const auto will_throw_overflow = [&b] () {b = 3;};
+    EXPECT_THROW(will_throw_overflow(), ndgpp::error<ndgpp::bounded_integer_overflow>);
+
+    const auto will_throw_underflow = [&b] () {b = 0;};
+    EXPECT_THROW(will_throw_underflow(), ndgpp::error<ndgpp::bounded_integer_underflow>);
+}
+
+TEST(assignment, integral_constant)
+{
+    using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
+    bounded_integer b{2};
+    b = std::integral_constant<int, 1> {};
+    EXPECT_EQ(1, b.get());
+}
+
+TEST(assignment, max)
+{
+    using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
+    bounded_integer b{1};
+    b = ndgpp::bounded_integer_max;
+    EXPECT_EQ(2, b.get());
+}
+
+TEST(assignment, min)
+{
+    using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
+    bounded_integer b{2};
+    b = ndgpp::bounded_integer_min;
+    EXPECT_EQ(1, b.get());
+}
+
+TEST(assignment, string)
+{
+    using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
+    bounded_integer b{2};
+    b = std::string {"1"};
+    EXPECT_EQ(1, b.get());
+
+}
+
+TEST(assignment, c_string)
+{
+    using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
+    bounded_integer b{2};
+    b = "1";
+    EXPECT_EQ(1, b.get());
+
+}

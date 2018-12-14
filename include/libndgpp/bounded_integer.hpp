@@ -182,6 +182,26 @@ namespace ndgpp
         bounded_integer(bounded_integer&&) noexcept;
         bounded_integer& operator=( bounded_integer&&) noexcept;
 
+        /// Assigns the integer to the integral value
+        template <class U>
+        bounded_integer & operator=(const U value);
+
+        /// Assigns the integer to the value represented in the std::string
+        bounded_integer & operator=(const std::string & value);
+
+        /// Assigns the integer to the value represented in the C string
+        bounded_integer & operator=(char const * const value);
+
+        /// Assigns the integer to the integral constant
+        template <class U, U Val>
+        bounded_integer & operator=(const std::integral_constant<U, Val>) noexcept;
+
+        /// Assigns the integer to its maximum allowed value
+        bounded_integer & operator=(bounded_integer_max_t) noexcept;
+
+        /// Assigns the integer to its minimum allowed value
+        bounded_integer & operator=(bounded_integer_min_t) noexcept;
+
         /// Returns the underlying value
         constexpr value_type get() const noexcept;
 
@@ -303,6 +323,107 @@ namespace ndgpp
                                                        char const * const delimiters):
         bounded_integer(str.c_str(), pos, base, delimiters, delimiters + std::strlen(delimiters))
     {}
+
+    template <class T, T Min, T Max, class Tag>
+    template <class U>
+    bounded_integer<T, Min, Max, Tag>& bounded_integer<T, Min, Max, Tag>::operator=(const U value)
+    {
+        if (ndgpp::safe_op::lt(value, Min))
+        {
+            throw ndgpp::error<bounded_integer_underflow>(ndgpp_source_location);
+        }
+        else if (ndgpp::safe_op::gt(value, Max))
+        {
+            throw ndgpp::error<bounded_integer_overflow>(ndgpp_source_location);
+        }
+
+        this->value_ = value;
+        return *this;
+    }
+
+    template <class T, T Min, T Max, class Tag>
+    bounded_integer<T, Min, Max, Tag>& bounded_integer<T, Min, Max, Tag>::operator=(const std::string& value)
+    {
+        const ndgpp::strto_result<value_type> result =
+            ndgpp::strtoi<value_type, Min, Max>(value.c_str());
+
+        if (result)
+        {
+            value_ = result.value();
+            return *this;
+        }
+
+        if (result.overflow())
+        {
+            throw ndgpp::error<bounded_integer_overflow>(ndgpp_source_location);
+        }
+
+        if (result.underflow())
+        {
+            throw ndgpp::error<bounded_integer_underflow>(ndgpp_source_location);
+        }
+
+        if (result.invalid())
+        {
+            throw ndgpp::error<bounded_integer_invalid>(ndgpp_source_location);
+        }
+
+        return *this;
+    }
+
+    template <class T, T Min, T Max, class Tag>
+    bounded_integer<T, Min, Max, Tag>& bounded_integer<T, Min, Max, Tag>::operator=(char const * const value)
+    {
+        const ndgpp::strto_result<value_type> result =
+            ndgpp::strtoi<value_type, Min, Max>(value);
+
+        if (result)
+        {
+            value_ = result.value();
+            return *this;
+        }
+
+        if (result.overflow())
+        {
+            throw ndgpp::error<bounded_integer_overflow>(ndgpp_source_location);
+        }
+
+        if (result.underflow())
+        {
+            throw ndgpp::error<bounded_integer_underflow>(ndgpp_source_location);
+        }
+
+        if (result.invalid())
+        {
+            throw ndgpp::error<bounded_integer_invalid>(ndgpp_source_location);
+        }
+
+        return *this;
+    }
+
+    template <class T, T Min, T Max, class Tag>
+    template <class U, U Val>
+    bounded_integer<T, Min, Max, Tag>& bounded_integer<T, Min, Max, Tag>::operator=(std::integral_constant<U, Val>) noexcept
+    {
+        static_assert(Val >= Min, "Val is less than Min");
+        static_assert(Val <= Max, "Val is less than Min");
+        this->value_ = Val;
+        return *this;
+    }
+
+    template <class T, T Min, T Max, class Tag>
+    bounded_integer<T, Min, Max, Tag>& bounded_integer<T, Min, Max, Tag>::operator=(bounded_integer_max_t) noexcept
+    {
+        this->value_ = Max;
+        return *this;
+    }
+
+    template <class T, T Min, T Max, class Tag>
+    bounded_integer<T, Min, Max, Tag>& bounded_integer<T, Min, Max, Tag>::operator=(bounded_integer_min_t) noexcept
+    {
+        this->value_ = Min;
+        return *this;
+    }
 
     template <class T, T Min, T Max, class Tag>
     inline constexpr std::decay_t<T> bounded_integer<T, Min, Max, Tag>::get() const noexcept
