@@ -6,14 +6,14 @@ TEST(ctor, min_ctor)
 {
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     constexpr bounded_integer b (ndgpp::bounded_integer_min);
-    EXPECT_EQ(bounded_integer::min(), b.get());
+    EXPECT_EQ(bounded_integer::min(), b.value());
 }
 
 TEST(ctor, max_ctor)
 {
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     constexpr bounded_integer b(ndgpp::bounded_integer_max);
-    EXPECT_EQ(bounded_integer::max(), b.get());
+    EXPECT_EQ(bounded_integer::max(), b.value());
 }
 
 TEST(ctor, min_value_type)
@@ -22,7 +22,7 @@ TEST(ctor, min_value_type)
     bounded_integer b(1);
 
     EXPECT_EQ(1, bounded_integer::min());
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(ctor, max_value_type)
@@ -31,7 +31,7 @@ TEST(ctor, max_value_type)
     bounded_integer b(2);
 
     EXPECT_EQ(2, bounded_integer::max());
-    EXPECT_EQ(2, b.get());
+    EXPECT_EQ(2, b.value());
 }
 
 TEST(ctor, underflow_value_type)
@@ -61,7 +61,7 @@ TEST(ctor, min_other_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b(1U);
 
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(ctor, max_other_type)
@@ -69,7 +69,7 @@ TEST(ctor, max_other_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b(2U);
 
-    EXPECT_EQ(2, b.get());
+    EXPECT_EQ(2, b.value());
 }
 
 TEST(ctor, underflow_other_type)
@@ -99,7 +99,7 @@ TEST(ctor, min_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b(std::string {"1"});
 
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(ctor, max_string_type)
@@ -107,7 +107,7 @@ TEST(ctor, max_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b(std::string {"2"});
 
-    EXPECT_EQ(2, b.get());
+    EXPECT_EQ(2, b.value());
 }
 
 TEST(ctor, offseted_string_type)
@@ -115,7 +115,7 @@ TEST(ctor, offseted_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b(std::string {"a2"}, 1);
 
-    EXPECT_EQ(2, b.get());
+    EXPECT_EQ(2, b.value());
 }
 
 TEST(ctor, octal_string_type)
@@ -123,7 +123,7 @@ TEST(ctor, octal_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 8>;
     bounded_integer b(std::string {"010"});
 
-    EXPECT_EQ(8, b.get());
+    EXPECT_EQ(8, b.value());
 }
 
 TEST(ctor, hex_string_type)
@@ -131,7 +131,7 @@ TEST(ctor, hex_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 16>;
     bounded_integer b(std::string {"0x10"});
 
-    EXPECT_EQ(16, b.get());
+    EXPECT_EQ(16, b.value());
 }
 
 TEST(ctor, underflow_string_type)
@@ -169,7 +169,7 @@ TEST(ctor, offseted_char_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b(std::string {"a2"}, 1);
 
-    EXPECT_EQ(2, b.get());
+    EXPECT_EQ(2, b.value());
 }
 
 TEST(ctor, octal_char_string_type)
@@ -177,7 +177,7 @@ TEST(ctor, octal_char_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 8>;
     bounded_integer b(std::string {"010"});
 
-    EXPECT_EQ(8, b.get());
+    EXPECT_EQ(8, b.value());
 }
 
 TEST(ctor, hex_char_string_type)
@@ -185,7 +185,7 @@ TEST(ctor, hex_char_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 16>;
     bounded_integer b(std::string {"0x10"});
 
-    EXPECT_EQ(16, b.get());
+    EXPECT_EQ(16, b.value());
 }
 
 TEST(ctor, min_char_string_type)
@@ -193,7 +193,7 @@ TEST(ctor, min_char_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b("1");
 
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(ctor, max_char_string_type)
@@ -201,7 +201,7 @@ TEST(ctor, max_char_string_type)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b("2");
 
-    EXPECT_EQ(2, b.get());
+    EXPECT_EQ(2, b.value());
 }
 
 TEST(ctor, underflow_char_string_type)
@@ -238,7 +238,7 @@ TEST(ctor, char_string_char_string_delimiter)
 {
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b("1:2", 0, 0, ":");
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(ctor, char_string_iter_delimiter)
@@ -246,14 +246,14 @@ TEST(ctor, char_string_iter_delimiter)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     const std::vector<char> d = {':', ','};
     bounded_integer b("1:2", 0, 0, d.cbegin(), d.cend());
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(ctor, string_char_string_delimiter)
 {
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b(std::string("1:2"), 0, 0, ":");
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(ctor, string_iter_delimiter)
@@ -261,16 +261,16 @@ TEST(ctor, string_iter_delimiter)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     const std::vector<char> d = {':', ','};
     bounded_integer b(std::string("1:2"), 0, 0, d.cbegin(), d.cend());
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(ctor, integral_constant)
 {
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     constexpr bounded_integer b(std::integral_constant<int, 2>{});
-    EXPECT_EQ(2, b.get());
+    EXPECT_EQ(2, b.value());
 
-    std::array<char, b.get()> array;
+    std::array<char, b.value()> array;
     EXPECT_EQ(2U, array.size());
 }
 
@@ -335,7 +335,7 @@ TEST(hash_test, equals_value_type_hash)
     std::hash<int> int_hasher;
     std::hash<bounded_integer> b_hasher;
 
-    EXPECT_EQ(int_hasher(b.get()), b_hasher(b));
+    EXPECT_EQ(int_hasher(b.value()), b_hasher(b));
 }
 
 TEST(swap_test, correctness)
@@ -346,8 +346,8 @@ TEST(swap_test, correctness)
 
     std::swap(b1, b2);
 
-    EXPECT_EQ(2, b1.get());
-    EXPECT_EQ(1, b2.get());
+    EXPECT_EQ(2, b1.value());
+    EXPECT_EQ(1, b2.value());
 }
 
 TEST(assignment, integral)
@@ -356,10 +356,10 @@ TEST(assignment, integral)
     bounded_integer b{2};
 
     b = 1;
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 
     b = 2U;
-    EXPECT_EQ(2, b.get());
+    EXPECT_EQ(2, b.value());
 
     const auto will_throw_overflow = [&b] () {b = 3;};
     EXPECT_THROW(will_throw_overflow(), ndgpp::error<ndgpp::bounded_integer_overflow>);
@@ -373,7 +373,7 @@ TEST(assignment, integral_constant)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b{2};
     b = std::integral_constant<int, 1> {};
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(assignment, max)
@@ -381,7 +381,7 @@ TEST(assignment, max)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b{1};
     b = ndgpp::bounded_integer_max;
-    EXPECT_EQ(2, b.get());
+    EXPECT_EQ(2, b.value());
 }
 
 TEST(assignment, min)
@@ -389,7 +389,7 @@ TEST(assignment, min)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b{2};
     b = ndgpp::bounded_integer_min;
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 }
 
 TEST(assignment, string)
@@ -397,7 +397,7 @@ TEST(assignment, string)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b{2};
     b = std::string {"1"};
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 
 }
 
@@ -406,6 +406,6 @@ TEST(assignment, c_string)
     using bounded_integer = ndgpp::bounded_integer<int, 1, 2>;
     bounded_integer b{2};
     b = "1";
-    EXPECT_EQ(1, b.get());
+    EXPECT_EQ(1, b.value());
 
 }

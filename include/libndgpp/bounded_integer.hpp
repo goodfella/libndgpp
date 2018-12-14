@@ -203,7 +203,7 @@ namespace ndgpp
         bounded_integer & operator=(bounded_integer_min_t) noexcept;
 
         /// Returns the underlying value
-        constexpr value_type get() const noexcept;
+        constexpr value_type value() const noexcept;
 
         /// Swaps two bounded_integer values
         void swap(bounded_integer& other) noexcept;
@@ -426,7 +426,7 @@ namespace ndgpp
     }
 
     template <class T, T Min, T Max, class Tag>
-    inline constexpr std::decay_t<T> bounded_integer<T, Min, Max, Tag>::get() const noexcept
+    inline constexpr std::decay_t<T> bounded_integer<T, Min, Max, Tag>::value() const noexcept
     {
         return this->value_;
     }
@@ -441,132 +441,132 @@ namespace ndgpp
     inline bool operator < (const bounded_integer<T, Min, Max, Tag> lhs,
                             const bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return lhs.get() < rhs.get();
+        return lhs.value() < rhs.value();
     }
 
     template <class T, T Min, T Max, class Tag, class U>
     inline bool operator < (const bounded_integer<T, Min, Max, Tag> lhs,
                             const U rhs) noexcept
     {
-        return ndgpp::safe_op::lt(lhs.get(), rhs);
+        return ndgpp::safe_op::lt(lhs.value(), rhs);
     }
 
     template <class U, class T, T Min, T Max, class Tag>
     inline bool operator < (const U lhs,
                             bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return ndgpp::safe_op::lt(lhs, rhs.get());
+        return ndgpp::safe_op::lt(lhs, rhs.value());
     }
 
     template <class T, T Min, T Max, class Tag>
     inline bool operator == (const bounded_integer<T, Min, Max, Tag> lhs,
                              const bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return lhs.get() == rhs.get();
+        return lhs.value() == rhs.value();
     }
 
     template <class T, T Min, T Max, class Tag, class U>
     inline bool operator == (const bounded_integer<T, Min, Max, Tag> lhs,
                              const U rhs) noexcept
     {
-        return lhs.get() == rhs;
+        return lhs.value() == rhs;
     }
 
     template <class U, class T, T Min, T Max, class Tag>
     inline bool operator == (const U lhs,
                              bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return lhs == rhs.get();
+        return lhs == rhs.value();
     }
 
     template <class T, T Min, T Max, class Tag>
     inline bool operator != (const bounded_integer<T, Min, Max, Tag> lhs,
                              const bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return lhs.get() != rhs.get();
+        return lhs.value() != rhs.value();
     }
 
     template <class T, T Min, T Max, class Tag, class U>
     inline bool operator != (const bounded_integer<T, Min, Max, Tag> lhs,
                              const U rhs) noexcept
     {
-        return lhs.get() != rhs;
+        return lhs.value() != rhs;
     }
 
     template <class U, class T, T Min, T Max, class Tag>
     inline bool operator != (const U lhs,
                              bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return lhs != rhs.get();
+        return lhs != rhs.value();
     }
 
     template <class T, T Min, T Max, class Tag>
     inline bool operator > (const bounded_integer<T, Min, Max, Tag> lhs,
                             const bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return ndgpp::safe_op::gt(lhs.get(), rhs.get());
+        return ndgpp::safe_op::gt(lhs.value(), rhs.value());
     }
 
     template <class T, T Min, T Max, class Tag, class U>
     inline bool operator > (const bounded_integer<T, Min, Max, Tag> lhs,
                             const U rhs) noexcept
     {
-        return ndgpp::safe_op::gt(lhs.get(), rhs);
+        return ndgpp::safe_op::gt(lhs.value(), rhs);
     }
 
     template <class U, class T, T Min, T Max, class Tag>
     inline bool operator > (const U lhs,
                             bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return ndgpp::safe_op::gt(lhs, rhs.get());
+        return ndgpp::safe_op::gt(lhs, rhs.value());
     }
 
     template <class T, T Min, T Max, class Tag>
     inline bool operator >= (const bounded_integer<T, Min, Max, Tag> lhs,
                              const bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return ndgpp::safe_op::gte(lhs.get(), rhs.get());
+        return ndgpp::safe_op::gte(lhs.value(), rhs.value());
     }
 
     template <class T, T Min, T Max, class Tag, class U>
     inline bool operator >= (const bounded_integer<T, Min, Max, Tag> lhs,
                              const U rhs) noexcept
     {
-        return ndgpp::safe_op::gte(lhs.get(), rhs);
+        return ndgpp::safe_op::gte(lhs.value(), rhs);
     }
 
     template <class U, class T, T Min, T Max, class Tag>
     inline bool operator >= (const U lhs,
                              bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return ndgpp::safe_op::gte(lhs, rhs.get());
+        return ndgpp::safe_op::gte(lhs, rhs.value());
     }
 
     template <class T, T Min, T Max, class Tag>
     inline bool operator <= (const bounded_integer<T, Min, Max, Tag> lhs,
                              const bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return ndgpp::safe_op::lte(lhs.get(), rhs.get());
+        return ndgpp::safe_op::lte(lhs.value(), rhs.value());
     }
 
     template <class T, T Min, T Max, class Tag, class U>
     inline bool operator <= (const bounded_integer<T, Min, Max, Tag> lhs,
                              const U rhs) noexcept
     {
-        return ndgpp::safe_op::lte(lhs.get(), rhs);
+        return ndgpp::safe_op::lte(lhs.value(), rhs);
     }
 
     template <class U, class T, T Min, T Max, class Tag>
     inline bool operator <= (const U lhs,
                              bounded_integer<T, Min, Max, Tag> rhs) noexcept
     {
-        return ndgpp::safe_op::lte(lhs, rhs.get());
+        return ndgpp::safe_op::lte(lhs, rhs.value());
     }
 
     template <class T, T Min, T Max, class Tag>
     std::ostream& operator << (std::ostream& out, const bounded_integer<T, Min, Max, Tag> rhs)
     {
-        out << rhs.get();
+        out << rhs.value();
         return out;
     }
 }
@@ -582,7 +582,7 @@ namespace std
 
         result_type operator() (argument_type val) const noexcept
         {
-            return hasher(val.get());
+            return hasher(val.value());
         }
 
         std::hash<T> hasher;
