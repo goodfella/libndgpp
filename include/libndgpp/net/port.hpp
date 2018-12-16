@@ -17,7 +17,7 @@ namespace net
     using port = ndgpp::bounded_integer<uint16_t,
                                         std::numeric_limits<uint16_t>::min(),
                                         std::numeric_limits<uint16_t>::max(),
-                                        linuxpp::net::detail::port_tag>;
+                                        ndgpp::net::detail::port_tag>;
 }
 }
 
