@@ -37,7 +37,7 @@ namespace ndgpp { namespace net {
          *  @param An unsigned 32 bit integer in network byte order
          */
         explicit
-        ipv4_address(const uint32_t value) noexcept;
+        constexpr ipv4_address(const uint32_t value) noexcept;
 
         /** Constructs an address from a string
          *
@@ -48,10 +48,10 @@ namespace ndgpp { namespace net {
         explicit
         ipv4_address(const std::string & value);
 
-        ipv4_address(const ipv4_address & other) noexcept;
-        ipv4_address & operator=(const ipv4_address & other) noexcept;
+        constexpr ipv4_address(const ipv4_address & other) noexcept;
+        constexpr ipv4_address(ipv4_address && other) noexcept;
 
-        ipv4_address(ipv4_address && other) noexcept;
+        ipv4_address & operator=(const ipv4_address & other) noexcept;
         ipv4_address & operator=(ipv4_address && other) noexcept;
 
         /// Assignes the address based on the value_type value
@@ -67,16 +67,16 @@ namespace ndgpp { namespace net {
          *
          *  @note Index 0 is the most significant byte
          */
-        value_type value() const noexcept;
+        constexpr value_type value() const noexcept;
 
         /// Returns the address in network byte order as an unsigned 32 bit integer
-        uint32_t to_uint32() const noexcept;
+        constexpr uint32_t to_uint32() const noexcept;
 
         /// Returns the address as a dotted quad string
         std::string to_string() const;
 
         /// Provides access to a given octet in the address
-        uint8_t operator [](const std::size_t index) const noexcept;
+        constexpr uint8_t operator [](const std::size_t index) const noexcept;
 
         /// Provides access to a given octet in the address
         uint8_t & operator [](const std::size_t index) noexcept;
@@ -91,17 +91,17 @@ namespace ndgpp { namespace net {
 
     inline constexpr ipv4_address::ipv4_address() noexcept = default;
 
-    inline ipv4_address::ipv4_address(const ndgpp::net::ipv4_address &) noexcept = default;
+    inline constexpr ipv4_address::ipv4_address(const ndgpp::net::ipv4_address &) noexcept = default;
     inline ipv4_address & ndgpp::net::ipv4_address::operator=(const ndgpp::net::ipv4_address &) noexcept = default;
 
-    inline ipv4_address::ipv4_address(ndgpp::net::ipv4_address &&) noexcept = default;
+    inline constexpr ipv4_address::ipv4_address(ndgpp::net::ipv4_address &&) noexcept = default;
     inline ipv4_address & ndgpp::net::ipv4_address::operator=(ndgpp::net::ipv4_address &&) noexcept = default;
 
     inline constexpr ipv4_address::ipv4_address(const value_type value) noexcept:
         value_{value}
     {}
 
-    inline ipv4_address::ipv4_address(const uint32_t value) noexcept:
+    inline constexpr ipv4_address::ipv4_address(const uint32_t value) noexcept:
         value_{static_cast<uint8_t>((value & 0xff000000) >> 24U),
                static_cast<uint8_t>((value & 0x00ff0000) >> 16U),
                static_cast<uint8_t>((value & 0x0000ff00) >> 8U),
@@ -123,12 +123,12 @@ namespace ndgpp { namespace net {
         return *this;
     }
 
-    inline ipv4_address::value_type ipv4_address::value() const noexcept
+    inline constexpr ipv4_address::value_type ipv4_address::value() const noexcept
     {
         return this->value_;
     }
 
-    inline uint32_t ipv4_address::to_uint32() const noexcept
+    inline constexpr uint32_t ipv4_address::to_uint32() const noexcept
     {
         return
             (static_cast<uint32_t>(this->value_[0]) << 24) |
@@ -152,7 +152,7 @@ namespace ndgpp { namespace net {
         return std::string{buffer.begin(), buffer.begin() + bytes_written};
     }
 
-    inline uint8_t ipv4_address::operator [](const std::size_t index) const noexcept
+    inline constexpr uint8_t ipv4_address::operator [](const std::size_t index) const noexcept
     {
         return this->value_[index];
     }
