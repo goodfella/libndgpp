@@ -137,7 +137,8 @@ TEST(assignment, uint32)
 TEST(assignment, string)
 {
     constexpr ndgpp::net::ipv4_array expected {1,2,3,4};
-    ndgpp::net::ipv4_address addr {"1.2.3.4"};
+    ndgpp::net::ipv4_address addr;
+    addr = "1.2.3.4";
     EXPECT_EQ(expected, addr.value());
 }
 
