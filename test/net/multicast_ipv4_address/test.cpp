@@ -10,6 +10,32 @@ TEST(ctor, default_ctor)
     EXPECT_EQ(expected, addr.value());
 }
 
+TEST(ctor, ipv4_address)
+{
+    constexpr ndgpp::net::ipv4_address addr {ndgpp::net::ipv4_array {224,0,1,2}};
+    const ndgpp::net::multicast_ipv4_address maddr {addr};
+
+    EXPECT_EQ(addr.value(), maddr.value());
+}
+
+TEST(ctor, ipv4_address_too_low)
+{
+    constexpr ndgpp::net::ipv4_address addr {ndgpp::net::ipv4_array {223,0,1,2}};
+    auto will_throw = [&addr] () {const ndgpp::net::multicast_ipv4_address maddr {addr};};
+    using expected_exception = ndgpp::error<std::invalid_argument>;
+
+    EXPECT_THROW(will_throw(), expected_exception);
+}
+
+TEST(ctor, ipv4_address_too_high)
+{
+    constexpr ndgpp::net::ipv4_address addr {ndgpp::net::ipv4_array {240,0,1,2}};
+    auto will_throw = [&addr] () {const ndgpp::net::multicast_ipv4_address maddr {addr};};
+    using expected_exception = ndgpp::error<std::invalid_argument>;
+
+    EXPECT_THROW(will_throw(), expected_exception);
+}
+
 TEST(ctor, value_type)
 {
     constexpr ndgpp::net::ipv4_array ipv4_array {224,168,5,15};

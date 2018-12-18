@@ -19,6 +19,9 @@ namespace net {
         /// Constructs an address equal to 0.0.0.0
         constexpr multicast_ipv4_address() noexcept;
 
+        explicit
+        multicast_ipv4_address(const ndgpp::net::ipv4_address addr);
+
         /// Constructs an address equal to the array of octets passed in
         multicast_ipv4_address(const value_type octets);
 
@@ -100,6 +103,15 @@ namespace net {
         }
 
         return true;
+    }
+
+    inline multicast_ipv4_address::multicast_ipv4_address(const ndgpp::net::ipv4_address value):
+        address_{value}
+    {
+        if (!this->validate())
+        {
+            throw ndgpp_error(std::invalid_argument, "bad value_type");
+        }
     }
 
     inline multicast_ipv4_address::multicast_ipv4_address(const value_type value):
