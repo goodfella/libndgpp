@@ -168,6 +168,44 @@ TEST(ctor, string_fourth_octet_underflow)
     EXPECT_THROW(will_throw(), expected_exception);
 }
 
+TEST(copy_ctor, same_type)
+{
+    constexpr ndgpp::net::basic_ipv4_address<> addr1 {0xe0000000};
+    constexpr ndgpp::net::basic_ipv4_address<> addr2 {addr1};
+
+    EXPECT_EQ(addr1, addr2);
+}
+
+TEST(copy_ctor, different_type)
+{
+    constexpr ndgpp::net::basic_ipv4_address<> addr1 {0xe0000000};
+    constexpr ndgpp::net::basic_ipv4_address<0xe0000000> addr2 {addr1};
+
+    EXPECT_EQ(addr1.value(), addr2.value());
+}
+
+TEST(copy_ctor, different_type_too_low)
+{
+    constexpr ndgpp::net::basic_ipv4_address<> addr1 {0xe0000000};
+
+    auto throws = [addr1] () {
+        ndgpp::net::basic_ipv4_address<0xe1000000> addr2 {addr1};
+    };
+
+    EXPECT_THROW(throws(), ndgpp::error<std::out_of_range>);
+}
+
+TEST(copy_ctor, different_type_too_high)
+{
+    constexpr ndgpp::net::basic_ipv4_address<> addr1 {0xe0000002};
+
+    auto throws = [addr1] () {
+        ndgpp::net::basic_ipv4_address<0xe0000000, 0xe0000001> addr2 {addr1};
+    };
+
+    EXPECT_THROW(throws(), ndgpp::error<std::out_of_range>);
+}
+
 TEST(constrained_ctor, string_too_low)
 {
     const auto will_throw = [] () {const ndgpp::net::basic_ipv4_address<0xe0000000> addr {"223.255.255.255"};};

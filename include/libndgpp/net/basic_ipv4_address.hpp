@@ -44,11 +44,8 @@ namespace net {
         /// Constructs an address assigned to Min
         constexpr basic_ipv4_address() noexcept;
 
-        constexpr basic_ipv4_address(const basic_ipv4_address & other) noexcept;
-
         template <uint32_t MinO, uint32_t MaxO>
-        explicit
-        constexpr basic_ipv4_address(const basic_ipv4_address<MinO, MaxO> other) noexcept(!constrained);
+        constexpr basic_ipv4_address(const basic_ipv4_address<MinO, MaxO> & other) noexcept(MinO >= Min && MaxO <= Max);
 
         /// Constructs an address assigned to the value provided
         constexpr basic_ipv4_address(const value_type value) noexcept(!constrained);
@@ -109,14 +106,11 @@ namespace net {
     constexpr basic_ipv4_address<Min, Max>::basic_ipv4_address() noexcept = default;
 
     template <uint32_t Min, uint32_t Max>
-    constexpr basic_ipv4_address<Min, Max>::basic_ipv4_address(const basic_ipv4_address & addr) noexcept = default;
-
-    template <uint32_t Min, uint32_t Max>
     template <uint32_t MinO, uint32_t MaxO>
-    constexpr basic_ipv4_address<Min, Max>::basic_ipv4_address(const basic_ipv4_address<MinO, MaxO> addr) noexcept(!basic_ipv4_address::constrained):
+    constexpr basic_ipv4_address<Min, Max>::basic_ipv4_address(const basic_ipv4_address<MinO, MaxO> & addr) noexcept(MinO >= Min && MaxO <= Max):
         value_ {addr.value()}
     {
-        if (basic_ipv4_address::constrained)
+        if (!(MinO >= Min && MaxO <= Max))
         {
             if (!basic_ipv4_address<Min, Max>::validate(this->to_uint32()))
             {
