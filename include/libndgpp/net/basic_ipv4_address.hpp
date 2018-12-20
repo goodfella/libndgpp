@@ -47,6 +47,7 @@ namespace net {
         constexpr basic_ipv4_address(const basic_ipv4_address & other) noexcept;
 
         template <uint32_t MinO, uint32_t MaxO>
+        explicit
         constexpr basic_ipv4_address(const basic_ipv4_address<MinO, MaxO> other) noexcept(!constrained);
 
         /// Constructs an address assigned to the value provided
@@ -69,7 +70,6 @@ namespace net {
         basic_ipv4_address(const std::string & value);
 
         basic_ipv4_address & operator = (const basic_ipv4_address & value) noexcept;
-
 
         /// Assignes the address based on the value_type value
         basic_ipv4_address & operator = (const value_type value) noexcept(!constrained);

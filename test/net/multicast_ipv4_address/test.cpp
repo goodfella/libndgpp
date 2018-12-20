@@ -108,14 +108,3 @@ TEST(assignment, string_too_high)
     using expected_exception = ndgpp::error<std::out_of_range>;
     EXPECT_THROW(will_throw(), expected_exception);
 }
-
-TEST(cast, ipv4_address)
-{
-    ndgpp::net::multicast_ipv4_address maddr {"239.2.3.4"};
-    ndgpp::net::ipv4_address addr {maddr};
-    EXPECT_EQ(addr.value(), maddr.value());
-
-    maddr = ndgpp::net::ipv4_array{224,2,3,4};
-    addr = maddr;
-    EXPECT_EQ(addr.value(), maddr.value());
-}
