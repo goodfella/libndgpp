@@ -10,7 +10,9 @@ set(LIBNDGPP_SOURCE_DIR_LENGTH ${LIBNDGPP_SOURCE_DIR_LENGTH} PARENT_SCOPE)
 
 set(ndgpp_compile_flags -pedantic -Wall -Werror)
 add_library(ndgpp SHARED
-  src/net/ipv4_address.cpp)
+  src/net/ipv4_array.cpp
+  src/net/ipv4_address.cpp
+  src/net/multicast_ipv4_address.cpp)
 target_compile_options(ndgpp PUBLIC -std=c++14)
 target_compile_options(ndgpp PRIVATE ${ndgpp_compile_flags})
 target_include_directories(ndgpp PUBLIC
