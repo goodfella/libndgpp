@@ -52,7 +52,15 @@ namespace net {
 
         /** Constructs an address from an unsigned 32 bit integer
          *
-         *  @param An unsigned 32 bit integer in network byte order
+         *  The parameter's value is mapped to the address octet like
+         *  so:
+         *
+         *   address[0] = (value >> 24) & 0xff000000;
+         *   address[1] = (value >> 16) & 0x00ff0000;
+         *   address[2] = (value >> 8)  & 0x0000ff00;
+         *   address[3] = value         & 0x000000ff;
+         *
+         *  @param An unsigned 32 bit integer
          */
         explicit
         constexpr basic_ipv4_address(const uint32_t value) noexcept(!constrained);
@@ -71,7 +79,7 @@ namespace net {
         /// Assignes the address based on the value_type value
         basic_ipv4_address & operator = (const value_type value) noexcept(!constrained);
 
-        /// Assignes the address based on the passed in unsigned 32 bit network byte order value
+        /// Assignes the address based on the passed in unsigned 32 bit value
         basic_ipv4_address & operator = (const uint32_t value) noexcept (!constrained);
 
         /// Assignes the address based on the passed in dotted quad string value
@@ -83,7 +91,12 @@ namespace net {
 
         constexpr ndgpp::net::ipv4_array value() const noexcept;
 
-        /// Returns the address in network byte order as an unsigned 32 bit integer
+        /** Returns the address as an unsigned 32 bit integer
+         *
+         *  The address is mapped to the value like so:
+         *
+         *  addr[0] << 24 | addr[1] << 16 | addr[2] << 8 | addr[3]
+         */
         constexpr uint32_t to_uint32() const noexcept;
 
         /// Returns the address as a dotted quad string
