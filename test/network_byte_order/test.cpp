@@ -2,7 +2,10 @@
 
 #include <array>
 #include <cstring>
+#include <sstream>
+
 #include <libndgpp/network_byte_order.hpp>
+#include <libndgpp/strto.hpp>
 
 using host_types = ::testing::Types<uint16_t, uint32_t, uint64_t>;
 
@@ -82,6 +85,8 @@ class operator_test: public ::testing::Test
 {
     public:
 
+    using value_type = T;
+
     operator_test():
         nb1{values<T>::scalar},
         nb2{values<T>::scalar + 1},
@@ -155,4 +160,17 @@ TYPED_TEST(operator_test, greater_than_equal)
     EXPECT_GE(this->nb1, this->hb1);
     EXPECT_GE(this->nb2, this->hb1);
     EXPECT_FALSE(this->nb1 >= this->hb2);
+}
+
+TYPED_TEST(operator_test, insertion)
+{
+    using value_type = typename TestFixture::value_type;
+
+    std::stringstream ss;
+    ss << this->nb1;
+
+    const auto val = ndgpp::strtoi<value_type>(ss.str().c_str());
+    ASSERT_TRUE(static_cast<bool>(val));
+
+    EXPECT_EQ(val.value(), this->nb1);
 }

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <type_traits>
 #include <utility>
+#include <ostream>
 
 #include <libndgpp/network_byte_order_ops.hpp>
 
@@ -206,6 +207,14 @@ namespace ndgpp
     void swap(network_byte_order<T> & lhs, network_byte_order<T> & rhs)
     {
         lhs.swap(rhs);
+    }
+
+    template <class T>
+    inline
+    std::ostream & operator <<(std::ostream & out, const network_byte_order<T> val)
+    {
+        out << static_cast<T>(val);
+        return out;
     }
 }
 
