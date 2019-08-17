@@ -40,6 +40,10 @@ not have to use a different function name for each target integer type.
 A namespace that contains several functions that perform safe
 comparisons on integer types that differ in signedness.
 
+#### ndgpp::network_byte_order
+
+A integral type that stores an integral value in network byte order.
+
 ### Networking Primitives
 
 #### ndgpp::net::basic\_ipv4\_address
