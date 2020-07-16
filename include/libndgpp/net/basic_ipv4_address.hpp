@@ -14,6 +14,33 @@
 namespace ndgpp {
 namespace net {
 
+    template <uint32_t Min, uint32_t Max>
+    struct basic_ipv4_address_validator
+    {
+        constexpr
+        bool
+        operator () (uint32_t value)
+        {
+            if (value < Min || value > Max)
+            {
+                throw ndgpp_error(std::out_of_range, "supplied address out of range");
+            }
+
+            return true;
+        }
+    };
+
+    template <>
+    struct basic_ipv4_address_validator<0, 0xffffffff>
+    {
+        constexpr
+        bool
+        operator () (uint32_t value) noexcept
+        {
+            return true;
+        }
+    };
+
     /** IPv4 address value type
      *
      *  @tparam Min The minimum address value in network byte order
@@ -104,16 +131,8 @@ namespace net {
 
         private:
 
-        constexpr bool validate(const uint32_t value);
-
         ndgpp::net::ipv4_array value_ = {ndgpp::net::make_ipv4_array(Min)};
     };
-
-    template <uint32_t Min, uint32_t Max>
-    inline constexpr bool basic_ipv4_address<Min, Max>::validate(const uint32_t value)
-    {
-        return value < Min ? false : (value > Max? false : true);
-    }
 
     template <uint32_t Min, uint32_t Max>
     constexpr basic_ipv4_address<Min, Max>::basic_ipv4_address() noexcept = default;
@@ -125,10 +144,7 @@ namespace net {
     {
         if (!(MinO >= Min && MaxO <= Max))
         {
-            if (!basic_ipv4_address<Min, Max>::validate(this->to_uint32()))
-            {
-                throw ndgpp_error(std::out_of_range, "supplied address out of range");
-            }
+            basic_ipv4_address_validator<Min, Max> {} (this->to_uint32());
         }
     }
 
@@ -136,39 +152,21 @@ namespace net {
     constexpr basic_ipv4_address<Min, Max>::basic_ipv4_address(const ndgpp::net::ipv4_array value) noexcept(!basic_ipv4_address::constrained):
          value_ {value}
     {
-        if (basic_ipv4_address::constrained)
-        {
-            if (!basic_ipv4_address<Min, Max>::validate(this->to_uint32()))
-            {
-                throw ndgpp_error(std::out_of_range, "supplied address out of range");
-            }
-        }
+        basic_ipv4_address_validator<Min, Max> {} (this->to_uint32());
     }
 
     template <uint32_t Min, uint32_t Max>
     constexpr basic_ipv4_address<Min, Max>::basic_ipv4_address(const uint32_t value) noexcept(!basic_ipv4_address::constrained):
          value_ {ndgpp::net::make_ipv4_array(value)}
     {
-        if (basic_ipv4_address::constrained)
-        {
-            if (!basic_ipv4_address<Min, Max>::validate(value))
-            {
-                throw ndgpp_error(std::out_of_range, "supplied address out of range");
-            }
-        }
+        basic_ipv4_address_validator<Min, Max> {} (value);
     }
 
     template <uint32_t Min, uint32_t Max>
     basic_ipv4_address<Min, Max>::basic_ipv4_address(const std::string & value):
         value_ {ndgpp::net::make_ipv4_array(value)}
     {
-        if (basic_ipv4_address::constrained)
-        {
-            if (!basic_ipv4_address<Min, Max>::validate(this->to_uint32()))
-            {
-                throw ndgpp_error(std::out_of_range, "supplied address out of range");
-            }
-        }
+        basic_ipv4_address_validator<Min, Max> {} (this->to_uint32());
     }
 
     template <uint32_t Min, uint32_t Max>
@@ -180,15 +178,7 @@ namespace net {
     basic_ipv4_address<Min, Max>::operator = (const ndgpp::net::ipv4_array rhs) noexcept(!basic_ipv4_address::constrained)
     {
         this->value_ = rhs;
-
-        if (basic_ipv4_address::constrained)
-        {
-            if (!basic_ipv4_address<Min, Max>::validate(this->to_uint32()))
-            {
-                throw ndgpp_error(std::out_of_range, "supplied address out of range");
-            }
-        }
-
+        basic_ipv4_address_validator<Min, Max> {} (this->to_uint32());
         return *this;
     }
 
@@ -197,15 +187,7 @@ namespace net {
     basic_ipv4_address<Min, Max>::operator = (const uint32_t rhs) noexcept(!basic_ipv4_address::constrained)
     {
         this->value_ = ndgpp::net::make_ipv4_array(rhs);
-
-        if (basic_ipv4_address::constrained)
-        {
-            if (!basic_ipv4_address<Min, Max>::validate(rhs))
-            {
-                throw ndgpp_error(std::out_of_range, "supplied address out of range");
-            }
-        }
-
+        basic_ipv4_address_validator<Min, Max> {} (rhs);
         return *this;
     }
 
@@ -214,15 +196,7 @@ namespace net {
     basic_ipv4_address<Min, Max>::operator = (const std::string & rhs)
     {
         this->value_ = ndgpp::net::make_ipv4_array(rhs);
-
-        if (basic_ipv4_address::constrained)
-        {
-            if (!basic_ipv4_address<Min, Max>::validate(this->to_uint32()))
-            {
-                throw ndgpp_error(std::out_of_range, "supplied address out of range");
-            }
-        }
-
+        basic_ipv4_address_validator<Min, Max> {} (this->to_uint32());
         return *this;
     }
 

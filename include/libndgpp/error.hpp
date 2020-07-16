@@ -63,6 +63,6 @@ namespace ndgpp
     }
 }
 
-#define ndgpp_error(inner, ...) ndgpp::error<inner>(ndgpp_source_location, ##__VA_ARGS__)
+#define ndgpp_error(inner, ...) ndgpp::error<inner> {ndgpp_source_location, ##__VA_ARGS__}
 
 #endif
