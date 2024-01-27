@@ -83,8 +83,8 @@ namespace ndgpp
 
     template <class T,
               unsigned N,
-              T Min = std::numeric_limits<std::decay_t<T>>::min(),
-              T Max = std::numeric_limits<std::decay_t<T>>::max()>
+              T Min,
+              T Max>
     inline auto strtoi(char const * const str, int base, const char (&delims) [N])
     {
         return strtoi<T, char const*, Min, Max>(str,
@@ -95,8 +95,8 @@ namespace ndgpp
 
     template <class T,
               class DelimIter,
-              T Min = std::numeric_limits<std::decay_t<T>>::min(),
-              T Max = std::numeric_limits<std::decay_t<T>>::max()>
+              T Min,
+              T Max>
     auto strtoi(char const * const str, int base, DelimIter delim_first, DelimIter delim_last)
     {
         using decayed_type = std::decay_t<T>;
